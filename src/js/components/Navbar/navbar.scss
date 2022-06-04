@@ -1,0 +1,60 @@
+.navbar {
+    box-sizing: border-box;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    height: 50px;
+    padding-left: 15px;
+    padding-right: 15px;
+    .left {
+        display: flex;
+        align-items: center;
+        img {
+            width: 100px;
+            height: 40px;
+        }
+        
+        .list {
+            display: flex;
+            list-style: none;
+            gap: 10px;
+            &__item {
+                color: #999;
+                font-size: 15px;
+                padding: 5px 10px;
+                cursor: pointer;
+                border-radius: 5px;
+                &:hover {
+                    color: #fff;
+                }
+                &_active {
+                    color: #fff;
+                    background-color: #131320;
+                }
+            }
+        }
+    }
+    .right {
+        display: flex;
+        align-items: center;
+        .notifications {
+            button {
+                border: none;
+                background-color: transparent;
+                color: #fff;
+                width: 35px;
+                height: 35px;
+                cursor: pointer;
+            }
+        }
+        .user {
+            img {
+                width: 30px;
+                height: 30px;
+                object-fit: contains;
+                border-radius: 50%;
+                cursor: pointer;
+            }
+        }
+    }
+}
