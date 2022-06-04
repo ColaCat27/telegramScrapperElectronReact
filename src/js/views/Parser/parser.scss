@@ -1,0 +1,18 @@
+.parser {
+    padding: 15px;
+    .wrapper {
+        margin-top: 25px;
+        .group {
+            width: 400px;
+        }
+        .bottom {
+            width: 100%;
+            button {
+                display: block;
+                width: 400px;
+                margin: 20px auto;
+            }
+        }
+    }
+
+}

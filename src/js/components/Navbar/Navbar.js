@@ -10,7 +10,7 @@ function Navbar() {
 					className="logo"
 				/>
 				<ul className="list">
-					<li className="list__item list__item_active">Scraper</li>
+					<li className="list__item list__item_active">Parser</li>
 					<li className="list__item">Sender</li>
 					<li className="list__item">Logs</li>
 					<li className="list__item">Donate</li>
