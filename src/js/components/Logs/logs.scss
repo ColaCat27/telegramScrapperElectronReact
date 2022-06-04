@@ -12,6 +12,10 @@
             display: flex;
             align-items: center;
         }
+        .amount {
+            display: flex;
+            align-items: center;
+        }
     }
     .bottom {
         height: 150px;
@@ -23,5 +27,8 @@
                 margin-right: 5px;
             }
         }
+    }
+    .dnone {
+        display: none;
     }
 }

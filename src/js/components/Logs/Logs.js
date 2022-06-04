@@ -1,27 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
+import StopIcon from '@mui/icons-material/Stop';
+import DataArrayIcon from '@mui/icons-material/DataArray';
 import './logs.scss';
 
 function Logs() {
+	const [data, setData] = useState({
+		isWorking: false,
+		count: 0,
+	});
+
 	return (
 		<div className="logs">
 			<div className="top">
 				<div className="status">
-					<RotateRightIcon />
-					<span>Collecting data...</span>
+					{data.isWorking ? <RotateRightIcon /> : <StopIcon />}
+					<span>
+						{data.isWorking ? 'Collection data...' : 'Stop'}
+					</span>
 				</div>
 				<div className="amount">
-					Left: <span className="left">51251</span>
+					Left:<span className="left">{data.count}</span>
+					<DataArrayIcon />
 				</div>
 			</div>
 			<div className="bottom">
-				<div className="result">
+				<div className={data.isWorking ? 'result' : 'dnone'}>
 					<ContactMailIcon className="icon" />
-					User:
 					<span className="data">
 						Name, Lastname, Username, Phone
 					</span>
+					<span>Logs</span>
 				</div>
 			</div>
 		</div>
