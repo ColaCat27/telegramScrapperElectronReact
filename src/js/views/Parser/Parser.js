@@ -1,8 +1,6 @@
 import React from 'react';
 
 import Navbar from '../../components/Navbar/Navbar';
-import Input from '../../components/Input/Input';
-import Button from '../../components/Button/Button';
 import Logs from '../../components/Logs/Logs';
 
 import './parser.scss';
@@ -13,11 +11,14 @@ function Parser() {
 			<Navbar />
 			<div className="wrapper">
 				<div className="group">
-					<Input label="Group" placeholder="channel" />
+					<div className="input">
+						<label>Group</label>
+						<input type="text" placeholder="channel" id="group" />
+					</div>
 				</div>
 				<div className="bottom">
 					<Logs />
-					<Button text="Start" />
+					<button className="button">Start</button>
 				</div>
 			</div>
 		</div>

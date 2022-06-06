@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './navbar.scss';
 
 function Navbar() {
+	const [state, setState] = useState(false);
+
+	const handleMenu = () => {
+		setState(!state);
+	};
+
 	return (
 		<div className="navbar">
 			<div className="left">
@@ -37,7 +43,16 @@ function Navbar() {
 						</svg>
 					</button>
 				</div>
-				<div className="user">
+				<div className="user" onClick={handleMenu}>
+					<ul
+						className="user__menu"
+						style={{
+							display: state ? 'block' : '',
+						}}
+					>
+						<li className="user__menu-item">Profile Data</li>
+						<li className="user__menu-item">Change API Data</li>
+					</ul>
 					<img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" />
 				</div>
 			</div>

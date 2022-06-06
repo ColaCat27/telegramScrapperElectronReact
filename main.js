@@ -15,7 +15,7 @@ function createWindow() {
 		},
 	});
 
-	win.loadFile('index.html');
+	win.loadFile(`index.html`);
 }
 
 ipcMain.on('notify', (_, message) => {
