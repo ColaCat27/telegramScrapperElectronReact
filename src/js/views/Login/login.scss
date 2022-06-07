@@ -14,6 +14,18 @@
         margin-top: 10px;
         text-align: center;
     }
+    .btn-wrap {
+        display: flex;
+        justify-content: flex-end;
+        .back {
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            font-size: 11px;
+        }
+    }
+
     .button {
         font-size: 18px;
         text-transform: uppercase;

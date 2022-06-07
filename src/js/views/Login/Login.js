@@ -49,19 +49,15 @@ function Login() {
 				// navigate('/');
 				break;
 			case 'SEND':
-				console.log('Send phone');
-				result = ipcRenderer.sendSync('phone', phoneData);
-				if (result.message) {
-					setAuthError(true);
-					// setPhoneData({ phone: '' });
-					return;
-				}
-				setPhoneData((prev) => ({ ...prev, sended: true }));
-				setAuthError(false);
+				ipcRenderer.send('phone', phoneData);
 				break;
 			case 'CONFIRM':
 				console.log(phoneData);
 				ipcRenderer.send('code', phoneData);
+				break;
+			case 'BACK':
+				setConfirm(false);
+				ipcRenderer.send('destroy', 'back');
 				break;
 			default:
 				break;
@@ -118,6 +114,11 @@ function Login() {
 					)}
 				</div>
 				<div className={confirm ? 'confirm' : 'confirm hidden'}>
+					<div className="btn-wrap">
+						<button className="back" onClick={handleClick}>
+							BACK
+						</button>
+					</div>
 					<div className="input">
 						<label>PHONE</label>
 						<input
@@ -143,13 +144,6 @@ function Login() {
 					<button className="button" onClick={handleClick}>
 						{phoneData.sended ? 'Confirm' : 'Send'}
 					</button>
-					{authError ? (
-						<span className="error">
-							Ошибка, неправильный телефон
-						</span>
-					) : (
-						''
-					)}
 				</div>
 			</div>
 		</div>

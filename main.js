@@ -1,5 +1,5 @@
 const { BrowserWindow, app, ipcMain, Notification } = require('electron');
-const { TelegramClient, Api } = require('telegram');
+const { TelegramClient, Api, client } = require('telegram');
 const { StringSession } = require('telegram/sessions/index.js');
 const fs = require('fs');
 const input = require('input');
@@ -38,7 +38,6 @@ ipcMain.on('login', async (e, message) => {
 				phoneNumber: async () => {
 					return await new Promise((resolve, reject) => {
 						ipcMain.on('phone', (_, message) => {
-							console.log(message.phone);
 							resolve(message.phone);
 						});
 					});
@@ -51,17 +50,22 @@ ipcMain.on('login', async (e, message) => {
 					});
 				},
 				phoneCode: async () => {
+					console.log('Client: ' + client);
 					return await new Promise((resolve, reject) => {
 						ipcMain.on('code', (_, message) => {
 							resolve(message.code);
 						});
 					});
 				},
-				onError: (err) => console.log(err.message),
+				onError: (err) => console.log(err),
 			});
 		} catch (err) {
 			e.returnValue = err;
 		}
+
+		ipcMain.on('destroy', async (e, message) => {
+			client.destroy();
+		});
 	};
 
 	start();
