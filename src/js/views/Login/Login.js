@@ -1,9 +1,10 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/authContext';
 import { ipcRenderer } from 'electron';
 
 import './login.scss';
+import { MpSharp } from '@mui/icons-material';
 
 function Login() {
 	const [credentials, setCredentials] = useState({
@@ -12,6 +13,8 @@ function Login() {
 	});
 
 	const [confirm, setConfirm] = useState(false);
+
+	const [authError, setAuthError] = useState(false);
 
 	const [phoneData, setPhoneData] = useState({
 		phone: undefined,
@@ -23,13 +26,20 @@ function Login() {
 
 	const navigate = useNavigate();
 
-	const handleClick = (e) => {
+	const handleClick = async (e) => {
 		e.preventDefault();
 		const target = e.target;
+		let result;
 
 		switch (target.innerText) {
 			case 'START':
-				ipcRenderer.send('login', credentials);
+				result = ipcRenderer.sendSync('login', credentials);
+				if (result.message) {
+					setAuthError(true);
+					setCredentials({ id: '', hash: '' });
+					return;
+				}
+				setAuthError(false);
 				setConfirm(true);
 
 				// dispatch({
@@ -39,11 +49,19 @@ function Login() {
 				// navigate('/');
 				break;
 			case 'SEND':
+				console.log('Send phone');
+				result = ipcRenderer.sendSync('phone', phoneData);
+				if (result.message) {
+					setAuthError(true);
+					// setPhoneData({ phone: '' });
+					return;
+				}
 				setPhoneData((prev) => ({ ...prev, sended: true }));
-				console.log(`Phone data:${phoneData}`);
+				setAuthError(false);
 				break;
 			case 'CONFIRM':
-				console.log('All ok');
+				console.log(phoneData);
+				ipcRenderer.send('code', phoneData);
 				break;
 			default:
 				break;
@@ -53,6 +71,11 @@ function Login() {
 	const handleChange = (e) => {
 		if (e.target.id == 'id' || e.target.id == 'hash') {
 			setCredentials((prev) => ({
+				...prev,
+				[e.target.id]: e.target.value,
+			}));
+		} else {
+			setPhoneData((prev) => ({
 				...prev,
 				[e.target.id]: e.target.value,
 			}));
@@ -70,6 +93,7 @@ function Login() {
 							placeholder="25151"
 							id="id"
 							onChange={handleChange}
+							value={credentials.id}
 						/>
 					</div>
 					<div className="input">
@@ -79,11 +103,19 @@ function Login() {
 							placeholder="1t1tg43g3yyghHT534TF"
 							id="hash"
 							onChange={handleChange}
+							value={credentials.hash}
 						/>
 					</div>
 					<button className="button" onClick={handleClick}>
 						Start
 					</button>
+					{authError ? (
+						<span className="error">
+							Ошибка, неправильный API ID или API HASH
+						</span>
+					) : (
+						''
+					)}
 				</div>
 				<div className={confirm ? 'confirm' : 'confirm hidden'}>
 					<div className="input">
@@ -93,6 +125,7 @@ function Login() {
 							placeholder="380502221111"
 							id="phone"
 							onChange={handleChange}
+							value={phoneData.phone}
 						/>
 					</div>
 					<div
@@ -104,11 +137,19 @@ function Login() {
 							placeholder="1255"
 							id="code"
 							onChange={handleChange}
+							value={phoneData.code}
 						/>
 					</div>
 					<button className="button" onClick={handleClick}>
 						{phoneData.sended ? 'Confirm' : 'Send'}
 					</button>
+					{authError ? (
+						<span className="error">
+							Ошибка, неправильный телефон
+						</span>
+					) : (
+						''
+					)}
 				</div>
 			</div>
 		</div>

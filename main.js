@@ -2,6 +2,7 @@ const { BrowserWindow, app, ipcMain, Notification } = require('electron');
 const { TelegramClient, Api } = require('telegram');
 const { StringSession } = require('telegram/sessions/index.js');
 const fs = require('fs');
+const input = require('input');
 const path = require('path');
 
 const isDev = !app.isPackaged;
@@ -21,23 +22,50 @@ function createWindow() {
 	win.loadFile(`index.html`);
 }
 
-ipcMain.on('login', (_, message) => {
+ipcMain.on('login', async (e, message) => {
 	const { id, hash } = message;
 
 	const start = async () => {
+		const identif = parseInt(id);
 		let stringSession = new StringSession('');
-
-		const client = new TelegramClient(stringSession, id, hash, {
-			connectionRetries: 5,
-		});
-		await client.start({
-			phoneNumber: async () =>
-				await input.text('Введите мобильный номер: '),
-			password: async () => await input.text('Введите пароль: '),
-			phoneCode: async () => await input.text('Введите полученный код: '),
-			onError: (err) => console.log(err),
-		});
+		let client;
+		try {
+			client = new TelegramClient(stringSession, identif, hash, {
+				connectionRetries: 5,
+			});
+			e.returnValue = true;
+			await client.start({
+				phoneNumber: async () => {
+					return await new Promise((resolve, reject) => {
+						ipcMain.on('phone', (_, message) => {
+							console.log(message.phone);
+							resolve(message.phone);
+						});
+					});
+				},
+				password: async () => {
+					return await new Promise((resolve, reject) => {
+						ipcMain.on('password', (_, message) => {
+							resolve(message.password);
+						});
+					});
+				},
+				phoneCode: async () => {
+					return await new Promise((resolve, reject) => {
+						ipcMain.on('code', (_, message) => {
+							resolve(message.code);
+						});
+					});
+				},
+				onError: (err) => console.log(err.message),
+			});
+		} catch (err) {
+			e.returnValue = err;
+		}
 	};
+
+	start();
+	// console.log('Успешно подключен к аккаунту');
 });
 
 // ipcMain.on('notify', (_, message) => {
