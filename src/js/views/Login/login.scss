@@ -21,6 +21,7 @@
             background-color: #146b99;
         }
     }
+
     .input {
         display: flex;
         flex-direction: column;
@@ -45,6 +46,9 @@
                 color: #4D4D4D;
             }
         }
+    }
+    .hidden {
+        display: none;
     }
 }
 

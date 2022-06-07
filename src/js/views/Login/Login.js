@@ -11,7 +11,9 @@ function Login() {
 		hash: undefined,
 	});
 
-	const [confirm, setConfirm] = useState({
+	const [confirm, setConfirm] = useState(false);
+
+	const [phoneData, setPhoneData] = useState({
 		phone: undefined,
 		code: undefined,
 		sended: false,
@@ -23,19 +25,29 @@ function Login() {
 
 	const handleClick = (e) => {
 		e.preventDefault();
+		const target = e.target;
 
-		if (!confirm.sended) {
-			ipcRenderer.send('login', credentials);
-			setCredentials({ id: undefined, hash: undefined });
-			setConfirm((prev) => ({ ...prev, sended: true }));
-			console.log(confirm);
+		switch (target.innerText) {
+			case 'START':
+				ipcRenderer.send('login', credentials);
+				setConfirm(true);
+
+				// dispatch({
+				// 	type: 'LOGIN_SUCESS',
+				// 	payload: JSON.stringify(credentials),
+				// });
+				// navigate('/');
+				break;
+			case 'SEND':
+				setPhoneData((prev) => ({ ...prev, sended: true }));
+				console.log(`Phone data:${phoneData}`);
+				break;
+			case 'CONFIRM':
+				console.log('All ok');
+				break;
+			default:
+				break;
 		}
-		// dispatch({
-		// 	type: 'LOGIN_SUCESS',
-		// 	payload: JSON.stringify(credentials),
-		// });
-
-		// navigate('/');
 	};
 
 	const handleChange = (e) => {
@@ -50,34 +62,54 @@ function Login() {
 	return (
 		<div className="login">
 			<div className="wrapper">
-				{error}
-				<div className="input">
-					<label>{confirm.sended ? 'PHONE' : 'API ID'}</label>
-					<input
-						type="text"
-						placeholder={
-							confirm.sended ? '+380508167897' : '214512'
-						}
-						id={confirm.sended ? 'phone' : 'id'}
-						onChange={handleChange}
-						value={confirm.sended ? confirm.phone : credentials.id}
-					/>
+				<div className={confirm ? 'api hidden' : 'api'}>
+					<div className="input">
+						<label>API ID</label>
+						<input
+							type="text"
+							placeholder="25151"
+							id="id"
+							onChange={handleChange}
+						/>
+					</div>
+					<div className="input">
+						<label>API HASH</label>
+						<input
+							type="text"
+							placeholder="1t1tg43g3yyghHT534TF"
+							id="hash"
+							onChange={handleChange}
+						/>
+					</div>
+					<button className="button" onClick={handleClick}>
+						Start
+					</button>
 				</div>
-				<div className="input">
-					<label>{confirm.sended ? 'CODE' : 'API HASH'}</label>
-					<input
-						type="text"
-						placeholder={
-							confirm.sended ? '12345' : '1t1tg43g3yyghHT534TF'
-						}
-						id={confirm.sended ? 'code' : 'hash'}
-						onChange={handleChange}
-						value={confirm.sended ? confirm.code : credentials.hash}
-					/>
+				<div className={confirm ? 'confirm' : 'confirm hidden'}>
+					<div className="input">
+						<label>PHONE</label>
+						<input
+							type="text"
+							placeholder="380502221111"
+							id="phone"
+							onChange={handleChange}
+						/>
+					</div>
+					<div
+						className={phoneData.sended ? 'input' : 'input hidden'}
+					>
+						<label>CODE</label>
+						<input
+							type="text"
+							placeholder="1255"
+							id="code"
+							onChange={handleChange}
+						/>
+					</div>
+					<button className="button" onClick={handleClick}>
+						{phoneData.sended ? 'Confirm' : 'Send'}
+					</button>
 				</div>
-				<button className="button" onClick={handleClick}>
-					{confirm.sended ? 'Confirm' : 'Start'}
-				</button>
 			</div>
 		</div>
 	);
