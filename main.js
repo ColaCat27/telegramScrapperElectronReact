@@ -30,15 +30,6 @@ function createWindow() {
 	return win;
 }
 
-// if (window.process) {
-//     window.process.on('uncaughtException', function (error) {
-//         const {app, dialog} = window.require("electron").remote;
-//         dialog.showMessageBoxSync({type: 'error', message: "Unexpected error occurred. Restarting the application.", title: "Error"});
-//         app.relaunch();
-//         app.quit();
-//     });
-// }
-
 // ipcMain.on('notify', (_, message) => {
 // 	new Notification({ title: 'Notifiation', body: message }).show();
 // });
@@ -75,7 +66,7 @@ const login = async (id, hash, e, win) => {
 			connectionRetries: 5,
 		});
 	} catch (err) {
-		win.webContents.send('login-error', 'hello');
+		win.webContents.send('authData-error', true);
 	}
 
 	await client.start({
@@ -94,6 +85,7 @@ const login = async (id, hash, e, win) => {
 			});
 		},
 		phoneCode: async () => {
+			win.webContents.send('phone-correct', true);
 			return await new Promise((resolve, reject) => {
 				ipcMain.on('code', (_, message) => {
 					resolve(message.code);
@@ -106,21 +98,22 @@ const login = async (id, hash, e, win) => {
 				case 'PHONE_NUMBER_INVALID':
 					win.webContents.send('phone-error', true);
 					break;
+				case 'PHONE_CODE_INVALID':
+					win.webContents.send('code-error', true);
 				default:
+					console.log(err);
 					break;
 			}
 		},
 	});
 
-	const isAuth = await client.isUserAuthorized();
+	const session = client.session.save();
 
-	if (!isAuth) {
-		ipcMain.send('login-error');
+	win.webContents.send('login-success', session);
+
+	if (!fs.existsSync(`${__dirname}/sessions`)) {
+		fs.mkdirSync(`${__dirname}/sessions`);
 	}
-
-	const session = await client.session.save();
-
-	ipcMain.send('login-success', session);
 
 	fs.writeFileSync(`${__dirname}/sessions/session`, session);
 

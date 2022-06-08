@@ -39,6 +39,9 @@
         &:hover {
             background-color: #146b99;
         }
+        &:disabled {
+            background-color: #4D4D4D;
+        }
     }
 
     .input {
