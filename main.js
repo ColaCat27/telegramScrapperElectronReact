@@ -65,61 +65,63 @@ const login = async (id, hash, e, win) => {
 		client = new TelegramClient(stringSession, identif, hash, {
 			connectionRetries: 5,
 		});
+
+		await client.start({
+			phoneNumber: async () => {
+				win.webContents.send('data-correct', true);
+				return await new Promise((resolve, reject) => {
+					ipcMain.on('phone', (_, message) => {
+						resolve(message.phone);
+					});
+				});
+			},
+			password: async () => {
+				return await new Promise((resolve, reject) => {
+					ipcMain.on('password', (_, message) => {
+						resolve(message.password);
+					});
+				});
+			},
+			phoneCode: async () => {
+				win.webContents.send('phone-correct', true);
+				return await new Promise((resolve, reject) => {
+					ipcMain.on('code', (_, message) => {
+						resolve(message.code);
+					});
+				});
+			},
+			onError: (err) => {
+				const errorType = err.errorMessage;
+				switch (errorType) {
+					case 'PHONE_NUMBER_INVALID':
+						win.webContents.send('phone-correct', false);
+						break;
+					case 'PHONE_CODE_INVALID':
+						win.webContents.send('code-correct', false);
+					default:
+						console.log(err);
+						break;
+				}
+			},
+		});
+		win.webContents.send('code-correct', true);
+
+		const session = client.session.save();
+
+		win.webContents.send('login-success', session);
+
+		if (!fs.existsSync(`${__dirname}/sessions`)) {
+			fs.mkdirSync(`${__dirname}/sessions`);
+		}
+
+		fs.writeFileSync(`${__dirname}/sessions/session`, session);
+
+		ipcMain.on('destroy', () => {
+			client.destroy();
+		});
 	} catch (err) {
-		win.webContents.send('authData-error', true);
+		win.webContents.send('data-correct', false);
 	}
-
-	await client.start({
-		phoneNumber: async () => {
-			return await new Promise((resolve, reject) => {
-				ipcMain.on('phone', (_, message) => {
-					resolve(message.phone);
-				});
-			});
-		},
-		password: async () => {
-			return await new Promise((resolve, reject) => {
-				ipcMain.on('password', (_, message) => {
-					resolve(message.password);
-				});
-			});
-		},
-		phoneCode: async () => {
-			win.webContents.send('phone-correct', true);
-			return await new Promise((resolve, reject) => {
-				ipcMain.on('code', (_, message) => {
-					resolve(message.code);
-				});
-			});
-		},
-		onError: (err) => {
-			const errorType = err.errorMessage;
-			switch (errorType) {
-				case 'PHONE_NUMBER_INVALID':
-					win.webContents.send('phone-error', true);
-					break;
-				case 'PHONE_CODE_INVALID':
-					win.webContents.send('code-error', true);
-				default:
-					console.log(err);
-					break;
-			}
-		},
-	});
-
-	const session = client.session.save();
-
-	win.webContents.send('login-success', session);
-
-	if (!fs.existsSync(`${__dirname}/sessions`)) {
-		fs.mkdirSync(`${__dirname}/sessions`);
-	}
-
-	fs.writeFileSync(`${__dirname}/sessions/session`, session);
-
-	ipcMain.on('destroy', () => {
-		client.destroy();
-	});
 };
 
 require('electron-reload')(__dirname, {

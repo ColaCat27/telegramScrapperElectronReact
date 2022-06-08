@@ -26,6 +26,7 @@ function Login() {
 	const { loading, error, dispatch } = useContext(AuthContext);
 
 	const navigate = useNavigate();
+	let result;
 
 	const handleClick = async (e) => {
 		e.preventDefault();
@@ -34,8 +35,24 @@ function Login() {
 		switch (target.innerText) {
 			case 'START':
 				ipcRenderer.send('login', credentials);
-				setAuthError(false);
-				setConfirm(true);
+
+				const authData = async () => {
+					return await new Promise((resolve, reject) => {
+						ipcRenderer.on('data-correct', (_, message) => {
+							resolve(message);
+						});
+					});
+				};
+				result = await authData();
+				console.log('result: ' + result);
+				if (result) {
+					setAuthError(false);
+					setConfirm(true);
+				} else {
+					setAuthError(true);
+					setConfirm(false);
+					setCredentials({ id: '', hash: '' });
+				}
 				break;
 			case 'SEND':
 				setPhoneData((prev) => ({ ...prev, sended: false }));
@@ -49,7 +66,7 @@ function Login() {
 					});
 				};
 
-				const result = await phoneNumber();
+				result = await phoneNumber();
 				if (result) {
 					setPhoneError(false);
 					setPhoneData((prev) => ({
@@ -68,9 +85,22 @@ function Login() {
 
 				break;
 			case 'CONFIRM':
-				console.log(phoneData);
 				ipcRenderer.send('code', phoneData);
 
+				const code = async () => {
+					return await new Promise((resolve, reject) => {
+						ipcRenderer.on('code-correct', (_, message) => {
+							resolve(message);
+						});
+					});
+				};
+
+				result = await code();
+
+				if (!result) {
+					setCodeError(true);
+					setPhoneData((prev) => ({ ...prev, code: '' }));
+				}
 				break;
 			case 'BACK':
 				setConfirm(false);
@@ -82,28 +112,24 @@ function Login() {
 		}
 	};
 
-	ipcRenderer.on('authData-error', (e, message) => {
-		setAuthError(true);
-		setConfirm(false);
-		// dispatch('LOGIN_FAILURE', message);
-	});
-
 	ipcRenderer.on('login-success', (e, message) => {
 		console.log('Событие login-success');
-		dispatch('LOGIN_SUCCESS', message);
+		console.log(message);
+		dispatch({ type: 'LOGIN_SUCCESS', payload: message });
 		navigate('/');
 	});
 
-	ipcRenderer.on('phone-error', (e, message) => {
-		setPhoneData((prev) => ({ ...prev, phone: '', sended: false }));
-		console.log('phone number incorrect');
-	});
+	// ipcRenderer.on('phone-error', (e, message) => {
+	// 	setPhoneData((prev) => ({ ...prev, phone: '', sended: false }));
+	// 	setPhoneError(true);
+	// 	console.log('phone number incorrect');
+	// });
 
-	ipcRenderer.on('code-error', (e, message) => {
-		setCodeError(true);
-		setPhoneData((prev) => ({ ...prev, code: '' }));
-		console.log('code incorrect');
-	});
+	// ipcRenderer.on('code-error', (e, message) => {
+	// 	setCodeError(true);
+	// 	setPhoneData((prev) => ({ ...prev, code: '' }));
+	// 	console.log('code incorrect');
+	// });
 
 	const handleChange = (e) => {
 		if (e.target.id == 'id' || e.target.id == 'hash') {
@@ -170,14 +196,7 @@ function Login() {
 							value={phoneData.phone}
 						/>
 					</div>
-					{phoneError ? (
-						<span className="error">
-							Такого телефона не существует, укажите правильный
-							телефон
-						</span>
-					) : (
-						''
-					)}
+
 					<div
 						className={phoneData.sended ? 'input' : 'input hidden'}
 					>
@@ -193,6 +212,14 @@ function Login() {
 					<button className="button" onClick={handleClick}>
 						{phoneData.sended ? 'Confirm' : 'Send'}
 					</button>
+					{phoneError ? (
+						<span className="error">
+							Такого телефона не существует, укажите правильный
+							телефон
+						</span>
+					) : (
+						''
+					)}
 					{codeError ? (
 						<span className="error">
 							Не верный код, введите код повторно или вернитесь

@@ -3,14 +3,8 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext } from './context/authContext.js';
 import Login from './views/Login/Login.js';
 import Parser from './views/Parser/Parser.js';
-import { ipcRenderer } from 'electron';
+
 function App() {
-	const [session, setSession] = useState(null);
-
-	ipcRenderer.on('session', (e, message) => {
-		console.log(message);
-	});
-
 	const ProtectedRoute = ({ children }) => {
 		const { apiData } = useContext(AuthContext);
 
