@@ -22,61 +22,84 @@ function createWindow() {
 	win.loadFile(`index.html`);
 }
 
-ipcMain.on('login', async (e, message) => {
-	const { id, hash } = message;
-
-	const start = async () => {
-		const identif = parseInt(id);
-		let stringSession = new StringSession('');
-		let client;
-		try {
-			client = new TelegramClient(stringSession, identif, hash, {
-				connectionRetries: 5,
-			});
-			e.returnValue = true;
-			await client.start({
-				phoneNumber: async () => {
-					return await new Promise((resolve, reject) => {
-						ipcMain.on('phone', (_, message) => {
-							resolve(message.phone);
-						});
-					});
-				},
-				password: async () => {
-					return await new Promise((resolve, reject) => {
-						ipcMain.on('password', (_, message) => {
-							resolve(message.password);
-						});
-					});
-				},
-				phoneCode: async () => {
-					console.log('Client: ' + client);
-					return await new Promise((resolve, reject) => {
-						ipcMain.on('code', (_, message) => {
-							resolve(message.code);
-						});
-					});
-				},
-				onError: (err) => console.log(err),
-			});
-		} catch (err) {
-			e.returnValue = err;
-		}
-
-		ipcMain.on('destroy', async (e, message) => {
-			client.destroy();
-		});
-	};
-
-	start();
-	// console.log('Успешно подключен к аккаунту');
-});
-
 // ipcMain.on('notify', (_, message) => {
 // 	new Notification({ title: 'Notifiation', body: message }).show();
 // });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(async () => {
+	await createWindow();
+
+	const isExist = fs.existsSync(`${__dirname}/sessions/session`);
+	if (isExist) {
+		const session = fs.readFileSync(`${__dirname}/sessions//session`, {
+			encoding: 'utf-8',
+		});
+		console.log('String session is: ' + session);
+		stringSession = new StringSession(session);
+		ipcMain.send('session', session);
+	} else {
+		stringSession = new StringSession('');
+		console.log('Create new session');
+		ipcMain.on('login', async (e, message) => {
+			const { id, hash } = message;
+			login(id, hash, e);
+		});
+	}
+});
+
+const login = async (id, hash, e) => {
+	const identif = parseInt(id);
+	let stringSession = new StringSession('');
+	let client;
+	try {
+		client = new TelegramClient(stringSession, identif, hash, {
+			connectionRetries: 5,
+		});
+		e.returnValue = true;
+		await client.start({
+			phoneNumber: async () => {
+				return await new Promise((resolve, reject) => {
+					ipcMain.on('phone', (_, message) => {
+						resolve(message.phone);
+					});
+				});
+			},
+			password: async () => {
+				return await new Promise((resolve, reject) => {
+					ipcMain.on('password', (_, message) => {
+						resolve(message.password);
+					});
+				});
+			},
+			phoneCode: async () => {
+				console.log('Client: ' + client);
+				return await new Promise((resolve, reject) => {
+					ipcMain.on('code', (_, message) => {
+						resolve(message.code);
+					});
+				});
+			},
+			onError: (err) => console.log(err),
+		});
+
+		const isAuth = await client.isUserAuthorized();
+
+		if (!isAuth) {
+			ipcMain.send('login-error');
+		}
+
+		fs.writeFileSync(
+			`${__dirname}/sessions/session`,
+			client.session.save()
+		);
+	} catch (err) {
+		e.returnValue = err;
+	}
+
+	ipcMain.on('destroy', () => {
+		client.destroy();
+	});
+};
 
 require('electron-reload')(__dirname, {
 	// Note that the path to electron may vary according to the main file

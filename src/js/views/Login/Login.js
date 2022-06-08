@@ -4,7 +4,6 @@ import { AuthContext } from '../../context/authContext';
 import { ipcRenderer } from 'electron';
 
 import './login.scss';
-import { MpSharp } from '@mui/icons-material';
 
 function Login() {
 	const [credentials, setCredentials] = useState({
@@ -41,28 +40,28 @@ function Login() {
 				}
 				setAuthError(false);
 				setConfirm(true);
-
-				// dispatch({
-				// 	type: 'LOGIN_SUCESS',
-				// 	payload: JSON.stringify(credentials),
-				// });
-				// navigate('/');
 				break;
 			case 'SEND':
+				setPhoneData((prev) => ({ ...prev, sended: true }));
 				ipcRenderer.send('phone', phoneData);
 				break;
 			case 'CONFIRM':
 				console.log(phoneData);
 				ipcRenderer.send('code', phoneData);
+
 				break;
 			case 'BACK':
 				setConfirm(false);
-				ipcRenderer.send('destroy', 'back');
+				ipcRenderer.send('destroy');
 				break;
 			default:
 				break;
 		}
 	};
+
+	ipcRenderer.on('login-error', (e, message) => {
+		console.log(message);
+	});
 
 	const handleChange = (e) => {
 		if (e.target.id == 'id' || e.target.id == 'hash') {
