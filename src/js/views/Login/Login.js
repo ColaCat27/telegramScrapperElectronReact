@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/authContext';
 import { ipcRenderer } from 'electron';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import './login.scss';
 
@@ -23,6 +24,8 @@ function Login() {
 		sended: false,
 	});
 
+	const [loader, setLoader] = useState(false);
+
 	const { loading, error, dispatch } = useContext(AuthContext);
 
 	const navigate = useNavigate();
@@ -35,7 +38,7 @@ function Login() {
 		switch (target.innerText) {
 			case 'START':
 				ipcRenderer.send('login', credentials);
-
+				setLoader(true);
 				const authData = async () => {
 					return await new Promise((resolve, reject) => {
 						ipcRenderer.on('data-correct', (_, message) => {
@@ -46,9 +49,11 @@ function Login() {
 				result = await authData();
 				console.log('result: ' + result);
 				if (result) {
+					setLoader(false);
 					setAuthError(false);
 					setConfirm(true);
 				} else {
+					setLoader(false);
 					setAuthError(true);
 					setConfirm(false);
 					setCredentials({ id: '', hash: '' });
@@ -71,7 +76,6 @@ function Login() {
 					setPhoneError(false);
 					setPhoneData((prev) => ({
 						...prev,
-						phone: '',
 						sended: true,
 					}));
 				} else {
@@ -119,18 +123,6 @@ function Login() {
 		navigate('/');
 	});
 
-	// ipcRenderer.on('phone-error', (e, message) => {
-	// 	setPhoneData((prev) => ({ ...prev, phone: '', sended: false }));
-	// 	setPhoneError(true);
-	// 	console.log('phone number incorrect');
-	// });
-
-	// ipcRenderer.on('code-error', (e, message) => {
-	// 	setCodeError(true);
-	// 	setPhoneData((prev) => ({ ...prev, code: '' }));
-	// 	console.log('code incorrect');
-	// });
-
 	const handleChange = (e) => {
 		if (e.target.id == 'id' || e.target.id == 'hash') {
 			setCredentials((prev) => ({
@@ -157,6 +149,7 @@ function Login() {
 							id="id"
 							onChange={handleChange}
 							value={credentials.id}
+							disabled={loader}
 						/>
 					</div>
 					<div className="input">
@@ -167,11 +160,19 @@ function Login() {
 							id="hash"
 							onChange={handleChange}
 							value={credentials.hash}
+							disabled={loader}
 						/>
 					</div>
-					<button className="button" onClick={handleClick}>
-						Start
-					</button>
+
+					{loader ? (
+						<div className="progress">
+							<CircularProgress />
+						</div>
+					) : (
+						<button className="button" onClick={handleClick}>
+							Start
+						</button>
+					)}
 					{authError ? (
 						<span className="error">
 							Ошибка, неправильный API ID или API HASH

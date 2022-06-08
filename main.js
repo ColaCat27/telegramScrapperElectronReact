@@ -37,27 +37,30 @@ function createWindow() {
 app.whenReady().then(async () => {
 	const win = await createWindow();
 
-	const isExist = fs.existsSync(`${__dirname}/sessions/session`);
-	if (isExist) {
-		const session = fs.readFileSync(`${__dirname}/sessions//session`, {
-			encoding: 'utf-8',
-		});
-		console.log('String session is: ' + session);
-		stringSession = new StringSession(session);
-		ipcMain.send('session', session);
-	} else {
-		stringSession = new StringSession('');
-		console.log('Create new session');
-		ipcMain.on('login', async (e, message) => {
-			const { id, hash } = message;
-			// const id = 5146593;
-			// const hash = 'fd90930b9ff6ced645baf18e28ac61a8';
-			login(id, hash, e, win);
-		});
-	}
+	ipcMain.on('login', async (e, message) => {
+		const { id, hash } = message;
+
+		login(id, hash, e, win);
+	});
+
+	// const isExist = fs.existsSync(`${__dirname}/sessions/session`);
+	// if (isExist) {
+	// 	const session = fs.readFileSync(`${__dirname}/sessions//session`, {
+	// 		encoding: 'utf-8',
+	// 	});
+	// 	stringSession = new StringSession(session);
+
+	// 	ipcMain.on('session', (e, message) => {
+	// 		console.log(message);
+	// 		e.returnValue = session;
+	// 	});
+	// } else {
+
+	// }
 });
 
 const login = async (id, hash, e, win) => {
+	console.log('Create new session');
 	const identif = parseInt(id);
 	let stringSession = new StringSession('');
 	let client;
@@ -99,7 +102,7 @@ const login = async (id, hash, e, win) => {
 					case 'PHONE_CODE_INVALID':
 						win.webContents.send('code-correct', false);
 					default:
-						console.log(err);
+						console.log(errorType);
 						break;
 				}
 			},

@@ -25,7 +25,12 @@
             font-size: 11px;
         }
     }
-
+    .progress {
+        margin-top: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
     .button {
         font-size: 18px;
         text-transform: uppercase;
@@ -66,6 +71,10 @@
             color: #7e7e7e;
             &::placeholder {
                 color: #4D4D4D;
+            }
+            &:disabled {
+                background-color: #0e0e0e;
+                color: #535353;
             }
         }
     }

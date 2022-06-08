@@ -7,7 +7,6 @@ import Parser from './views/Parser/Parser.js';
 function App() {
 	const ProtectedRoute = ({ children }) => {
 		const { apiData } = useContext(AuthContext);
-
 		if (!apiData) {
 			return <Navigate to="/login" />;
 		}
