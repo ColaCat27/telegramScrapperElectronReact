@@ -10,7 +10,7 @@ export const AuthContext = createContext(INITIAL_STATE);
 
 const AuthReducer = (state, action) => {
 	switch (action.type) {
-		case 'LOGIN_SUCESS':
+		case 'LOGIN_SUCCESS':
 			return {
 				apiData: action.payload,
 				loading: false,

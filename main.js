@@ -1,9 +1,16 @@
-const { BrowserWindow, app, ipcMain, Notification } = require('electron');
+const {
+	BrowserWindow,
+	app,
+	ipcMain,
+	Notification,
+	webContents,
+} = require('electron');
 const { TelegramClient, Api, client } = require('telegram');
 const { StringSession } = require('telegram/sessions/index.js');
 const fs = require('fs');
 const input = require('input');
 const path = require('path');
+const { ConstructionOutlined } = require('@mui/icons-material');
 
 const isDev = !app.isPackaged;
 
@@ -20,14 +27,24 @@ function createWindow() {
 	});
 
 	win.loadFile(`index.html`);
+	return win;
 }
+
+// if (window.process) {
+//     window.process.on('uncaughtException', function (error) {
+//         const {app, dialog} = window.require("electron").remote;
+//         dialog.showMessageBoxSync({type: 'error', message: "Unexpected error occurred. Restarting the application.", title: "Error"});
+//         app.relaunch();
+//         app.quit();
+//     });
+// }
 
 // ipcMain.on('notify', (_, message) => {
 // 	new Notification({ title: 'Notifiation', body: message }).show();
 // });
 
 app.whenReady().then(async () => {
-	await createWindow();
+	const win = await createWindow();
 
 	const isExist = fs.existsSync(`${__dirname}/sessions/session`);
 	if (isExist) {
@@ -42,12 +59,14 @@ app.whenReady().then(async () => {
 		console.log('Create new session');
 		ipcMain.on('login', async (e, message) => {
 			const { id, hash } = message;
-			login(id, hash, e);
+			// const id = 5146593;
+			// const hash = 'fd90930b9ff6ced645baf18e28ac61a8';
+			login(id, hash, e, win);
 		});
 	}
 });
 
-const login = async (id, hash, e) => {
+const login = async (id, hash, e, win) => {
 	const identif = parseInt(id);
 	let stringSession = new StringSession('');
 	let client;
@@ -55,46 +74,55 @@ const login = async (id, hash, e) => {
 		client = new TelegramClient(stringSession, identif, hash, {
 			connectionRetries: 5,
 		});
-		e.returnValue = true;
-		await client.start({
-			phoneNumber: async () => {
-				return await new Promise((resolve, reject) => {
-					ipcMain.on('phone', (_, message) => {
-						resolve(message.phone);
-					});
-				});
-			},
-			password: async () => {
-				return await new Promise((resolve, reject) => {
-					ipcMain.on('password', (_, message) => {
-						resolve(message.password);
-					});
-				});
-			},
-			phoneCode: async () => {
-				console.log('Client: ' + client);
-				return await new Promise((resolve, reject) => {
-					ipcMain.on('code', (_, message) => {
-						resolve(message.code);
-					});
-				});
-			},
-			onError: (err) => console.log(err),
-		});
-
-		const isAuth = await client.isUserAuthorized();
-
-		if (!isAuth) {
-			ipcMain.send('login-error');
-		}
-
-		fs.writeFileSync(
-			`${__dirname}/sessions/session`,
-			client.session.save()
-		);
 	} catch (err) {
-		e.returnValue = err;
+		win.webContents.send('login-error', 'hello');
 	}
+
+	await client.start({
+		phoneNumber: async () => {
+			return await new Promise((resolve, reject) => {
+				ipcMain.on('phone', (_, message) => {
+					resolve(message.phone);
+				});
+			});
+		},
+		password: async () => {
+			return await new Promise((resolve, reject) => {
+				ipcMain.on('password', (_, message) => {
+					resolve(message.password);
+				});
+			});
+		},
+		phoneCode: async () => {
+			return await new Promise((resolve, reject) => {
+				ipcMain.on('code', (_, message) => {
+					resolve(message.code);
+				});
+			});
+		},
+		onError: (err) => {
+			const errorType = err.errorMessage;
+			switch (errorType) {
+				case 'PHONE_NUMBER_INVALID':
+					win.webContents.send('phone-error', true);
+					break;
+				default:
+					break;
+			}
+		},
+	});
+
+	const isAuth = await client.isUserAuthorized();
+
+	if (!isAuth) {
+		ipcMain.send('login-error');
+	}
+
+	const session = await client.session.save();
+
+	ipcMain.send('login-success', session);
+
+	fs.writeFileSync(`${__dirname}/sessions/session`, session);
 
 	ipcMain.on('destroy', () => {
 		client.destroy();

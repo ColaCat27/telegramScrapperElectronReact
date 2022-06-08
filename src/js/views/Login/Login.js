@@ -32,14 +32,14 @@ function Login() {
 
 		switch (target.innerText) {
 			case 'START':
-				result = ipcRenderer.sendSync('login', credentials);
-				if (result.message) {
-					setAuthError(true);
-					setCredentials({ id: '', hash: '' });
-					return;
-				}
-				setAuthError(false);
-				setConfirm(true);
+				result = ipcRenderer.send('login', credentials);
+				// if (result.message) {
+				// 	setAuthError(true);
+				// 	setCredentials({ id: '', hash: '' });
+				// 	return;
+				// }
+				// setAuthError(false);
+				// setConfirm(true);
 				break;
 			case 'SEND':
 				setPhoneData((prev) => ({ ...prev, sended: true }));
@@ -52,6 +52,7 @@ function Login() {
 				break;
 			case 'BACK':
 				setConfirm(false);
+				setPhoneData((prev) => ({ ...prev, sended: false }));
 				ipcRenderer.send('destroy');
 				break;
 			default:
@@ -60,7 +61,27 @@ function Login() {
 	};
 
 	ipcRenderer.on('login-error', (e, message) => {
-		console.log(message);
+		setAuthError(true);
+		console.log('Событие login-error');
+		// dispatch('LOGIN_FAILURE', message);
+	});
+
+	ipcRenderer.on('login-success', (e, message) => {
+		console.log('Событие login-success');
+		// dispatch('LOGIN_SUCCESS', message);
+		// navigate('/');
+	});
+
+	ipcRenderer.on('phone-invalid', (e, message) => {
+		console.log('phone number invalid');
+	});
+
+	ipcRenderer.on('password-invalid', (e, message) => {
+		console.log('password invalid');
+	});
+
+	ipcRenderer.on('code-invalid', (e, message) => {
+		console.log('code invalid');
 	});
 
 	const handleChange = (e) => {
@@ -143,6 +164,13 @@ function Login() {
 					<button className="button" onClick={handleClick}>
 						{phoneData.sended ? 'Confirm' : 'Send'}
 					</button>
+					{authError ? (
+						<span className="error">
+							Не удалось выполнить вход в аккаунт
+						</span>
+					) : (
+						''
+					)}
 				</div>
 			</div>
 		</div>
