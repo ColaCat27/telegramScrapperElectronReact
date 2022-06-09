@@ -1,33 +1,21 @@
 .parser {
+    width: 100%;
     padding: 15px;
+    box-sizing: border-box;
     .wrapper {
         margin-top: 25px;
-        .button {
-            font-size: 18px;
-            text-transform: uppercase;
-            border: none;
-            background-color: #1D97D9;
-            padding: 11px;
-            color: #EBEBEB;
-            cursor: pointer;
-            width: 100%;
-            border-radius: 6px;
-            &:hover {
-                background-color: #146b99;
-            }
-        }
+
         .group {
-            width: 400px;
+            display: flex;
+            align-items: center;
         }
-        .bottom {
+        .logs-wrapper {
             width: 100%;
-            button {
-                display: block;
-                width: 400px;
-                margin: 20px auto;
-            }
+ 
         }
-        .input {
+        .input-wrapper {
+            width: 400px;
+            margin-right: 15px;
             display: flex;
             flex-direction: column;
             margin-bottom: 20px;
@@ -50,6 +38,34 @@
                 &::placeholder {
                     color: #4D4D4D;
                 }
+                &.selected {
+                    border: 1px solid #fff;
+                }
+            }
+        }
+        .tip {
+            font-size: 15px;
+            color: #fff;
+        }
+        .button {
+            display: block;
+            font-size: 18px;
+            text-transform: uppercase;
+            border: none;
+            background-color: #1D97D9;
+            padding: 11px;
+            color: #EBEBEB;
+            cursor: pointer;
+            width: 400px;
+            margin: 20px auto;
+            border-radius: 6px;
+            &:hover {
+                background-color: #146b99;
+            }
+            &:disabled {
+                color: #7e7e7e;
+                background-color: #303030;
+                cursor: auto;
             }
         }
     }

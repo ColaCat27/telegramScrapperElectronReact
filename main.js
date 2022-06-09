@@ -1,18 +1,17 @@
-const {
-	BrowserWindow,
-	app,
-	ipcMain,
-	Notification,
-	webContents,
-} = require('electron');
+const { BrowserWindow, app, ipcMain, Notification } = require('electron');
 const { TelegramClient, Api, client } = require('telegram');
 const { StringSession } = require('telegram/sessions/index.js');
 const fs = require('fs');
 const input = require('input');
 const path = require('path');
-const { ConstructionOutlined } = require('@mui/icons-material');
-
+const XLSX = require('xlsx');
 const isDev = !app.isPackaged;
+
+const sleep = (ms) => {
+	return new Promise((resolve, reject) => {
+		setTimeout(resolve, ms);
+	});
+};
 
 function createWindow() {
 	const win = new BrowserWindow({
@@ -40,27 +39,82 @@ app.whenReady().then(async () => {
 	ipcMain.on('login', async (e, message) => {
 		const { id, hash } = message;
 
-		login(id, hash, e, win);
+		login(id, hash, win);
 	});
 
-	// const isExist = fs.existsSync(`${__dirname}/sessions/session`);
-	// if (isExist) {
-	// 	const session = fs.readFileSync(`${__dirname}/sessions//session`, {
-	// 		encoding: 'utf-8',
-	// 	});
-	// 	stringSession = new StringSession(session);
+	ipcMain.on('start', async (e, message) => {
+		const { group, session } = message;
+		let id = 5146593;
+		let hash = 'fd90930b9ff6ced645baf18e28ac61a8';
 
-	// 	ipcMain.on('session', (e, message) => {
-	// 		console.log(message);
-	// 		e.returnValue = session;
-	// 	});
-	// } else {
+		const stringSession = new StringSession(session);
 
-	// }
+		const client = new TelegramClient(stringSession, id, hash, {
+			connectionRetries: 5,
+		});
+
+		await client.start({
+			phoneNumber: async () => {
+				win.webContents.send('data-correct', true);
+				return await new Promise((resolve, reject) => {
+					ipcMain.on('phone', (_, message) => {
+						resolve(message.phone);
+					});
+				});
+			},
+			password: async () => {
+				return await new Promise((resolve, reject) => {
+					ipcMain.on('password', (_, message) => {
+						resolve(message.password);
+					});
+				});
+			},
+			phoneCode: async () => {
+				win.webContents.send('phone-correct', true);
+				return await new Promise((resolve, reject) => {
+					ipcMain.on('code', (_, message) => {
+						resolve(message.code);
+					});
+				});
+			},
+			onError: (err) => {
+				const errorType = err.errorMessage;
+				switch (errorType) {
+					case 'PHONE_NUMBER_INVALID':
+						win.webContents.send('phone-correct', false);
+						break;
+					case 'PHONE_CODE_INVALID':
+						win.webContents.send('code-correct', false);
+					default:
+						console.log(errorType);
+						break;
+				}
+			},
+		});
+
+		const amount = await checkChannel(group, client);
+		win.webContents.send('amount', amount);
+		let counter = 0;
+		let globalCounter = 0;
+		let data = [];
+
+		if (!amount) {
+			win.webContents.send('channel-error');
+		}
+
+		while (counter < amount) {
+			counter = await getData(counter, win, client, group);
+			globalCounter = counter;
+			console.log('sleep 2000 ms');
+			await sleep(2000);
+			console.log('awake');
+		}
+
+		await writeResult(data, message);
+	});
 });
 
-const login = async (id, hash, e, win) => {
-	console.log('Create new session');
+const login = async (id, hash, win) => {
 	const identif = parseInt(id);
 	let stringSession = new StringSession('');
 	let client;
@@ -127,103 +181,65 @@ const login = async (id, hash, e, win) => {
 	}
 };
 
+const writeResult = (data, channelLink) => {
+	try {
+		var ws = XLSX.utils.aoa_to_sheet([
+			['Имя', 'Фамилия', 'Юзернейм', 'Телефон'],
+		]);
+		XLSX.utils.sheet_add_aoa(ws, data, { origin: -1 });
+
+		XLSX.utils.sheet_to_csv(ws);
+		var wb = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(wb, ws, 'WorksheetName');
+		XLSX.writeFile(wb, `${__dirname}/${channelLink}.xlsx`);
+		console.log('Результат записан');
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+const getData = async (counter, win, client, channelLink, globalCounter) => {
+	result = await client.invoke(
+		new Api.channels.GetParticipants({
+			channel: channelLink,
+			filter: new Api.ChannelParticipantsRecent({}),
+			offset: counter,
+			limit: 100,
+			hash: 0,
+		})
+	);
+	let user;
+	for (var j = 0; j < 100; j++) {
+		// globalCounter += j;
+		win.webContents.send('left', counter);
+		user = result.users[j];
+		try {
+			data.push([
+				user.firstName,
+				user.lastName,
+				user.username,
+				user.phone,
+			]);
+		} catch (err) {}
+	}
+	return counter + 100;
+};
+
+const checkChannel = async (channelLink, client) => {
+	let amount = await client.invoke(
+		new Api.channels.GetParticipants({
+			channel: channelLink,
+			filter: new Api.ChannelParticipantsRecent({}),
+			offset: 43,
+			limit: 1,
+			hash: 0,
+		})
+	);
+
+	return (amount = amount.count);
+};
+
 require('electron-reload')(__dirname, {
 	// Note that the path to electron may vary according to the main file
 	electron: require(`${__dirname}/node_modules/electron`),
 });
-
-// let stringSession;
-
-// (async () => {
-// 	console.log('Загрузка телеграм...');
-
-// 	const isExist = fs.existsSync(`./sessions/${apiHash}/session`);
-// 	if (isExist) {
-// 		const session = fs.readFileSync(`./sessions/${apiHash}/session`, {
-// 			encoding: 'utf-8',
-// 		});
-// 		stringSession = new StringSession(session); // fill this later with the value from session.save()
-// 	} else {
-// 		stringSession = new StringSession('');
-// 		console.log('Session not exist');
-// 	}
-
-// const client = new TelegramClient(
-// 	stringSession,
-// 	process.env.API_ID,
-// 	process.env.API_HASH,
-// 	{
-// 		connectionRetries: 5,
-// 	}
-// );
-// 	await client.start({
-// 		phoneNumber: async () => await input.text('Введите мобильный номер: '),
-// 		password: async () => await input.text('Введите пароль: '),
-// 		phoneCode: async () => await input.text('Введите полученный код: '),
-// 		onError: (err) => console.log(err),
-// 	});
-// 	console.log('Успешно подключен к аккаунту');
-// 	fs.writeFileSync(`./sessions/${apiHash}/session`, client.session.save());
-
-// 	const channelLink = await input.text('Введите ссылку на канал');
-
-// 	let amount = await client.invoke(
-// 		new Api.channels.GetParticipants({
-// 			channel: channelLink,
-// 			filter: new Api.ChannelParticipantsRecent({}),
-// 			offset: 43,
-// 			limit: 1,
-// 			hash: 0,
-// 		})
-// 	);
-
-// 	amount = amount.count;
-// 	let result;
-// 	let data = [];
-// 	console.log(amount);
-
-// 	try {
-// 		let i = 0;
-// 		let id = setInterval(async () => {
-// 			i += 100;
-
-// 			if (i >= amount) {
-// 				clearInterval(id);
-// 				var ws = XLSX.utils.aoa_to_sheet([
-// 					['Имя', 'Фамилия', 'Юзернейм', 'Телефон'],
-// 				]);
-// 				XLSX.utils.sheet_add_aoa(ws, data, { origin: -1 });
-
-// 				XLSX.utils.sheet_to_csv(ws);
-// 				var wb = XLSX.utils.book_new();
-// 				XLSX.utils.book_append_sheet(wb, ws, 'WorksheetName');
-// 				XLSX.writeFile(wb, `${__dirname}/${channelLink}.xlsx`);
-// 				console.log('Парсинг завершен');
-// 			} else {
-// 				result = await client.invoke(
-// 					new Api.channels.GetParticipants({
-// 						channel: channelLink,
-// 						filter: new Api.ChannelParticipantsRecent({}),
-// 						offset: i,
-// 						limit: 100,
-// 						hash: 0,
-// 					})
-// 				);
-// 				let user;
-// 				for (var j = 0; j < 100; j++) {
-// 					user = result.users[j];
-// 					try {
-// 						data.push([
-// 							user.firstName,
-// 							user.lastName,
-// 							user.username,
-// 							user.phone,
-// 						]);
-// 					} catch (err) {}
-// 				}
-// 			}
-// 		}, 1500);
-// 	} catch (err) {
-// 		console.log('Выполнение завершено');
-// 	}
-// })();

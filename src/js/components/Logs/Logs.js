@@ -5,7 +5,7 @@ import StopIcon from '@mui/icons-material/Stop';
 import DataArrayIcon from '@mui/icons-material/DataArray';
 import './logs.scss';
 
-function Logs() {
+function Logs({ left }) {
 	const [data, setData] = useState({
 		isWorking: false,
 		count: 0,
@@ -21,8 +21,7 @@ function Logs() {
 					</span>
 				</div>
 				<div className="amount">
-					Left:<span className="left">{data.count}</span>
-					<DataArrayIcon />
+					Left:<span className="left">{left}</span>
 				</div>
 			</div>
 			<div className="bottom">
