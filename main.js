@@ -138,8 +138,19 @@ app.whenReady().then(async () => {
 				})
 			);
 			let user;
+			new Promise((resolve, reject) => {
+				win.webContents.send('left', counter);
+				resolve();
+			}).then(() => {
+				win.webContents.send('data', {
+					firstName: user.firstName,
+					lastName: user.lastName,
+					username: user.username,
+					phone: user.phone,
+				});
+			});
+
 			for (var j = 0; j < 100; j++) {
-				win.webContents.send('left');
 				user = result.users[j];
 				try {
 					data.push([

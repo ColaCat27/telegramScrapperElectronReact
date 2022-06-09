@@ -1,7 +1,8 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../../context/authContext';
 import Navbar from '../../components/Navbar/Navbar';
 import Logs from '../../components/Logs/Logs';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import './parser.scss';
 import { ipcRenderer } from 'electron';
@@ -9,10 +10,12 @@ import { ipcRenderer } from 'electron';
 function Parser() {
 	const { apiData } = useContext(AuthContext);
 	const [group, setGroup] = useState(undefined);
-	const [isGroupExist, setIsGroupExist] = useState(false);
-	const [amount, setAmount] = useState(0);
-	const [left, setLeft] = useState(0);
+	const [count, setCount] = useState({
+		amount: 0,
+		left: 0,
+	});
 	const [channelError, setChannelError] = useState(false);
+	const [data, setData] = useState([]);
 
 	const handleClick = (e) => {
 		e.preventDefault();
@@ -23,22 +26,26 @@ function Parser() {
 		setGroup(e.target.value);
 	};
 
-	ipcRenderer.on('amount', (e, message) => {
-		console.log('Amount: ' + message);
+	ipcRenderer.on('amount', async (e, message) => {
 		const value = parseInt(message);
-		setAmount(value);
-		setLeft(value);
-		setChannelError(false);
+		await setCount(() => ({ amount: value, left: value }));
+		await setChannelError(false);
 	});
 
-	ipcRenderer.on('left', (e, message) => {
-		const result = left - 1;
-		setLeft(result);
-		console.log(left);
+	ipcRenderer.on('left', async (e, message) => {
+		let value = parseInt(message);
+		value = count.amount - value;
+		await setCount((prev) => ({ ...prev, left: value }));
 	});
 
 	ipcRenderer.on('channel-error', () => {
 		setChannelError(true);
+	});
+
+	ipcRenderer.on('data', async (e, message) => {
+		console.log(message);
+		await setData((prev) => prev.concat(message));
+		console.log(data);
 	});
 
 	return (
@@ -69,15 +76,26 @@ function Parser() {
 					)}
 				</div>
 				<div className="logs-wrapper">
-					<Logs left={amount} />
+					<Logs
+						left={count.left}
+						data={data}
+						isWorking={count.left ? true : false}
+					/>
 				</div>
-				<button
-					className="button"
-					onClick={handleClick}
-					disabled={!group}
-				>
-					Start
-				</button>
+
+				{count.amount ? (
+					<div className="progress">
+						<CircularProgress />
+					</div>
+				) : (
+					<button
+						className="button"
+						onClick={handleClick}
+						disabled={!group}
+					>
+						Start
+					</button>
+				)}
 			</div>
 		</div>
 	);

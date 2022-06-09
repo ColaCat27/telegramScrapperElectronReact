@@ -19,6 +19,7 @@
     .bottom {
         height: 150px;
         padding: 10px;
+        overflow-y: scroll;
         .result {
             display: flex;
             align-items: center;
