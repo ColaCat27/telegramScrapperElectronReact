@@ -27,13 +27,14 @@ function Parser() {
 		console.log('Amount: ' + message);
 		const value = parseInt(message);
 		setAmount(value);
+		setLeft(value);
 		setChannelError(false);
 	});
 
 	ipcRenderer.on('left', (e, message) => {
-		console.log('Left: ' + message);
-		const value = parseInt(message);
-		setLeft(value);
+		const result = left - 1;
+		setLeft(result);
+		console.log(left);
 	});
 
 	ipcRenderer.on('channel-error', () => {
@@ -68,7 +69,7 @@ function Parser() {
 					)}
 				</div>
 				<div className="logs-wrapper">
-					<Logs left={amount - left} />
+					<Logs left={amount} />
 				</div>
 				<button
 					className="button"

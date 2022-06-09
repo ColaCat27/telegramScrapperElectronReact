@@ -95,7 +95,6 @@ app.whenReady().then(async () => {
 		const amount = await checkChannel(group, client);
 		win.webContents.send('amount', amount);
 		let counter = 0;
-		let globalCounter = 0;
 		let data = [];
 
 		if (!amount) {
@@ -104,13 +103,69 @@ app.whenReady().then(async () => {
 
 		while (counter < amount) {
 			counter = await getData(counter, win, client, group);
-			globalCounter = counter;
 			console.log('sleep 2000 ms');
 			await sleep(2000);
 			console.log('awake');
 		}
 
-		await writeResult(data, message);
+		await writeResult(data, group);
+
+		function writeResult(data, channelLink) {
+			try {
+				var ws = XLSX.utils.aoa_to_sheet([
+					['Имя', 'Фамилия', 'Юзернейм', 'Телефон'],
+				]);
+				XLSX.utils.sheet_add_aoa(ws, data, { origin: -1 });
+
+				XLSX.utils.sheet_to_csv(ws);
+				var wb = XLSX.utils.book_new();
+				XLSX.utils.book_append_sheet(wb, ws, 'WorksheetName');
+				XLSX.writeFile(wb, `${__dirname}/${channelLink}.xlsx`);
+				console.log('Результат записан');
+			} catch (err) {
+				console.log(err);
+			}
+		}
+
+		async function getData(counter, win, client, channelLink) {
+			result = await client.invoke(
+				new Api.channels.GetParticipants({
+					channel: channelLink,
+					filter: new Api.ChannelParticipantsRecent({}),
+					offset: counter,
+					limit: 100,
+					hash: 0,
+				})
+			);
+			let user;
+			for (var j = 0; j < 100; j++) {
+				win.webContents.send('left');
+				user = result.users[j];
+				try {
+					data.push([
+						user.firstName,
+						user.lastName,
+						user.username,
+						user.phone,
+					]);
+				} catch (err) {}
+			}
+			return counter + 100;
+		}
+
+		async function checkChannel(channelLink, client) {
+			let amount = await client.invoke(
+				new Api.channels.GetParticipants({
+					channel: channelLink,
+					filter: new Api.ChannelParticipantsRecent({}),
+					offset: 43,
+					limit: 1,
+					hash: 0,
+				})
+			);
+
+			return (amount = amount.count);
+		}
 	});
 });
 
@@ -179,64 +234,6 @@ const login = async (id, hash, win) => {
 	} catch (err) {
 		win.webContents.send('data-correct', false);
 	}
-};
-
-const writeResult = (data, channelLink) => {
-	try {
-		var ws = XLSX.utils.aoa_to_sheet([
-			['Имя', 'Фамилия', 'Юзернейм', 'Телефон'],
-		]);
-		XLSX.utils.sheet_add_aoa(ws, data, { origin: -1 });
-
-		XLSX.utils.sheet_to_csv(ws);
-		var wb = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(wb, ws, 'WorksheetName');
-		XLSX.writeFile(wb, `${__dirname}/${channelLink}.xlsx`);
-		console.log('Результат записан');
-	} catch (err) {
-		console.log(err);
-	}
-};
-
-const getData = async (counter, win, client, channelLink, globalCounter) => {
-	result = await client.invoke(
-		new Api.channels.GetParticipants({
-			channel: channelLink,
-			filter: new Api.ChannelParticipantsRecent({}),
-			offset: counter,
-			limit: 100,
-			hash: 0,
-		})
-	);
-	let user;
-	for (var j = 0; j < 100; j++) {
-		// globalCounter += j;
-		win.webContents.send('left', counter);
-		user = result.users[j];
-		try {
-			data.push([
-				user.firstName,
-				user.lastName,
-				user.username,
-				user.phone,
-			]);
-		} catch (err) {}
-	}
-	return counter + 100;
-};
-
-const checkChannel = async (channelLink, client) => {
-	let amount = await client.invoke(
-		new Api.channels.GetParticipants({
-			channel: channelLink,
-			filter: new Api.ChannelParticipantsRecent({}),
-			offset: 43,
-			limit: 1,
-			hash: 0,
-		})
-	);
-
-	return (amount = amount.count);
 };
 
 require('electron-reload')(__dirname, {
