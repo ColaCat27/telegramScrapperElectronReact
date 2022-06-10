@@ -58,32 +58,17 @@ class Logs extends React.Component {
 				<div className="bottom">
 					<div className="inner-wrapper">
 						{this.state.body.map((item, i) => {
-							if (this.state.body.length - 1 === i) {
-								ipcRenderer.send('complete');
-								return (
-									<div className="user" key={i}>
-										<ContactMailIcon className="icon" />
-										<div>
-											{item.firstName}
-											{', ' + item.lastName},
-											{', ' + item.username},
-											{', ' + item.phone}
-										</div>
+							return (
+								<div className="user" key={i}>
+									<ContactMailIcon className="icon" />
+									<div>
+										{item.firstName}
+										{', ' + item.lastName},
+										{', ' + item.username},
+										{', ' + item.phone}
 									</div>
-								);
-							} else {
-								return (
-									<div className="user" key={i}>
-										<ContactMailIcon className="icon" />
-										<div>
-											{item.firstName}
-											{', ' + item.lastName},
-											{', ' + item.username},
-											{', ' + item.phone}
-										</div>
-									</div>
-								);
-							}
+								</div>
+							);
 						})}
 					</div>
 				</div>
