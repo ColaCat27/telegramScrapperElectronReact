@@ -1,8 +1,10 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../context/authContext';
 import Navbar from '../../components/Navbar/Navbar';
 import Logs from '../../components/Logs/Logs';
 import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
 
 import './parser.scss';
 import { ipcRenderer } from 'electron';
@@ -20,7 +22,7 @@ function Parser() {
 	};
 
 	const handleChange = (e) => {
-		setGroup(e.target.value);
+		setGroup(e.target.value.replace(/(\W|https\:\/\/t\.me)/g, ''));
 	};
 
 	ipcRenderer.on('channel-error', () => {
@@ -37,15 +39,23 @@ function Parser() {
 			<div className="wrapper">
 				<div className="group">
 					<div className="input-wrapper">
-						<label>Group</label>
-						<input
-							type="text"
-							placeholder="channel"
-							className={!group ? 'selected' : ''}
-							id="group"
-							value={group}
-							onChange={handleChange}
-						/>
+						<Box
+							component="form"
+							sx={{
+								'& > :not(style)': { m: 1, width: '25ch' },
+							}}
+							noValidate
+							autoComplete="off"
+						>
+							<TextField
+								id="standard-basic"
+								label="Group"
+								variant="standard"
+								autoFocus={true}
+								value={group}
+								onChange={handleChange}
+							/>
+						</Box>
 					</div>
 					{channelError ? (
 						<div className="tip">Channel not found</div>

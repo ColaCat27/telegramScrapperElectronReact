@@ -14,33 +14,25 @@
  
         }
         .input-wrapper {
-            width: 400px;
-            margin-right: 15px;
+            width: 250px;
             display: flex;
             flex-direction: column;
             margin-bottom: 20px;
-        
-            label {
-                color: #EBEBEB;
-                font-size: 18px;
-                text-transform: uppercase;
-                margin-bottom: 1px;
-                margin-left: 10px;
+
+        }
+        #standard-basic-label {
+            color: #fff;
+            &::placeholder {
+                color: #fff;
             }
-            input {
-                padding: 15px;
-                font-size: 18px;
-                border: none;
-                border-radius: 6px;
-                background-color: #10101E;
-                outline: none;
-                color: #7e7e7e;
-                &::placeholder {
-                    color: #4D4D4D;
-                }
-                &.selected {
-                    border: 1px solid #fff;
-                }
+        }
+        .MuiInputBase-formControl {
+            color: #fff;
+            &::before {
+                border-bottom: 2px solid #fff;
+            }
+            &:hover::before {
+                border-color: #fff;
             }
         }
         .tip {
