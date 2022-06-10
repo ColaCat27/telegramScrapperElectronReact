@@ -5,6 +5,8 @@ import Logs from '../../components/Logs/Logs';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 
 import './parser.scss';
 import { ipcRenderer } from 'electron';
@@ -58,14 +60,18 @@ function Parser() {
 						</Box>
 					</div>
 					{channelError ? (
-						<div className="tip">Channel not found</div>
+						<Alert severity="error">Eror channel not found!</Alert>
 					) : (
 						''
 					)}
 					{!group ? (
-						<div className="tip">Enter telegram group link</div>
+						<Alert severity="info">
+							Please enter telegram group link!
+						</Alert>
 					) : (
-						''
+						<Alert severity="success">
+							All okay you can start right now!
+						</Alert>
 					)}
 				</div>
 				<div className="logs-wrapper">
