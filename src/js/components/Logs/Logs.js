@@ -26,7 +26,7 @@ class Logs extends React.Component {
 			this.setState((prev) => ({
 				...prev,
 				left: prev.amount - message.counter,
-				body: message.data,
+				body: prev.body.concat(message.data),
 			}));
 		});
 	}

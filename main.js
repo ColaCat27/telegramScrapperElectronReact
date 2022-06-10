@@ -94,6 +94,7 @@ app.whenReady().then(async () => {
 
 		const amount = await checkChannel(group, client);
 		win.webContents.send('amount', amount);
+
 		let counter = 0;
 		let data = [];
 
@@ -103,22 +104,23 @@ app.whenReady().then(async () => {
 
 		while (counter < amount) {
 			counter = await getData(counter, win, client, group);
-			await console.log('sleep 2000 ms');
-			await sleep(5000);
-			await console.log('awake');
+			console.log('sleep 2000 ms');
+			await sleep(2000);
+			console.log('awake');
 		}
 
 		await writeResult(data, group);
 
 		function writeResult(data, channelLink) {
+			let ws;
 			try {
-				var ws = XLSX.utils.aoa_to_sheet([
+				ws = XLSX.utils.aoa_to_sheet([
 					['Имя', 'Фамилия', 'Юзернейм', 'Телефон'],
 				]);
 				XLSX.utils.sheet_add_aoa(ws, data, { origin: -1 });
 
 				XLSX.utils.sheet_to_csv(ws);
-				var wb = XLSX.utils.book_new();
+				let wb = XLSX.utils.book_new();
 				XLSX.utils.book_append_sheet(wb, ws, 'WorksheetName');
 				XLSX.writeFile(wb, `${__dirname}/${channelLink}.xlsx`);
 				console.log('Результат записан');
@@ -144,7 +146,7 @@ app.whenReady().then(async () => {
 				data: result.users,
 			});
 
-			for (var j = 0; j < 1; j++) {
+			for (var j = 0; j < 100; j++) {
 				user = result.users[j];
 				try {
 					data.push([
