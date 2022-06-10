@@ -20,15 +20,18 @@
         height: 150px;
         padding: 10px;
         overflow-y: scroll;
-        .result {
+        .inner-wrapper {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            .user {
+                display: flex;
+            }
             .icon {
                 margin-right: 5px;
             }
         }
     }
     .dnone {
-        display: none;
+        // display: none;
     }
 }

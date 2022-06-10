@@ -104,7 +104,7 @@ app.whenReady().then(async () => {
 		while (counter < amount) {
 			counter = await getData(counter, win, client, group);
 			console.log('sleep 2000 ms');
-			await sleep(2000);
+			await sleep(5000);
 			console.log('awake');
 		}
 
@@ -138,19 +138,13 @@ app.whenReady().then(async () => {
 				})
 			);
 			let user;
-			new Promise((resolve, reject) => {
-				win.webContents.send('left', counter);
-				resolve();
-			}).then(() => {
-				win.webContents.send('data', {
-					firstName: user.firstName,
-					lastName: user.lastName,
-					username: user.username,
-					phone: user.phone,
-				});
+
+			await win.webContents.send('data', {
+				counter: counter,
+				data: result.users,
 			});
 
-			for (var j = 0; j < 100; j++) {
+			for (var j = 0; j < 1; j++) {
 				user = result.users[j];
 				try {
 					data.push([

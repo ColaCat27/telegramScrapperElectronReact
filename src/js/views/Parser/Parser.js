@@ -10,42 +10,21 @@ import { ipcRenderer } from 'electron';
 function Parser() {
 	const { apiData } = useContext(AuthContext);
 	const [group, setGroup] = useState(undefined);
-	const [count, setCount] = useState({
-		amount: 0,
-		left: 0,
-	});
 	const [channelError, setChannelError] = useState(false);
-	const [data, setData] = useState([]);
+	const [isWorking, setIsWorking] = useState(false);
 
 	const handleClick = (e) => {
 		e.preventDefault();
 		ipcRenderer.send('start', { group: group, session: apiData });
+		setIsWorking(true);
 	};
 
 	const handleChange = (e) => {
 		setGroup(e.target.value);
 	};
 
-	ipcRenderer.on('amount', async (e, message) => {
-		const value = parseInt(message);
-		await setCount(() => ({ amount: value, left: value }));
-		await setChannelError(false);
-	});
-
-	ipcRenderer.on('left', async (e, message) => {
-		let value = parseInt(message);
-		value = count.amount - value;
-		await setCount((prev) => ({ ...prev, left: value }));
-	});
-
 	ipcRenderer.on('channel-error', () => {
 		setChannelError(true);
-	});
-
-	ipcRenderer.on('data', async (e, message) => {
-		console.log(message);
-		await setData((prev) => prev.concat(message));
-		console.log(data);
 	});
 
 	return (
@@ -76,14 +55,10 @@ function Parser() {
 					)}
 				</div>
 				<div className="logs-wrapper">
-					<Logs
-						left={count.left}
-						data={data}
-						isWorking={count.left ? true : false}
-					/>
+					<Logs isWorking={isWorking} />
 				</div>
 
-				{count.amount ? (
+				{isWorking ? (
 					<div className="progress">
 						<CircularProgress />
 					</div>
