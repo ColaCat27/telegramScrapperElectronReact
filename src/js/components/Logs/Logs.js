@@ -5,67 +5,91 @@ import ContactMailIcon from '@mui/icons-material/ContactMail';
 import StopIcon from '@mui/icons-material/Stop';
 import './logs.scss';
 
-function Logs({ isWorking }) {
-	// const [data, setData] = useState([]);
+class Logs extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			amount: 0,
+			left: 0,
+			body: [],
+		};
+	}
 
-	const [data, setData] = useState({
-		amount: 0,
-		left: 0,
-		body: [],
-	});
+	componentDidMount() {
+		ipcRenderer.on('amount', (e, message) => {
+			const value = parseInt(message);
+			this.setState((prev) => ({ ...prev, amount: value, left: value }));
+			setChannelError(false);
+		});
 
-	useEffect(() => {}, [data]);
+		ipcRenderer.on('data', (e, message) => {
+			this.setState((prev) => ({
+				...prev,
+				left: prev.amount - message.counter,
+				body: message.data,
+			}));
+		});
+	}
 
-	// ipcRenderer.on('left', async (e, message) => {
-	// 	let value = parseInt(message);
-	// 	value = count.amount - value;
-	// 	await setCount((prev) => ({ ...prev, left: value }));
-	// });
-
-	ipcRenderer.on('amount', async (e, message) => {
-		const value = parseInt(message);
-		await setData((prev) => ({ ...prev, amount: value, left: value }));
-		await setChannelError(false);
-	});
-
-	ipcRenderer.on('data', async (e, message) => {
-		await setData((prev) => ({
-			...prev,
-			left: data.amount - message.counter,
-			body: message.data,
-		}));
-		console.log(data.body);
-	});
-
-	return (
-		<div className="logs">
-			<div className="top">
-				<div className="status">
-					{isWorking ? <RotateRightIcon /> : <StopIcon />}
-					<span>{isWorking ? 'Collection data...' : 'Stop'}</span>
+	componentWillUnmount() {
+		ipcRenderer.removeListener('amount');
+		ipcRenderer.removeListener('data');
+	}
+	render() {
+		return (
+			<div className="logs">
+				<div className="top">
+					<div className="status">
+						{this.state.isWorking ? (
+							<RotateRightIcon />
+						) : (
+							<StopIcon />
+						)}
+						<span>
+							{this.state.isWorking
+								? 'Collection data...'
+								: 'Stop'}
+						</span>
+					</div>
+					<div className="amount">
+						Left:<span className="left">{this.state.left}</span>
+					</div>
 				</div>
-				<div className="amount">
-					Left:<span className="left">{data.left}</span>
+				<div className="bottom">
+					<div className="inner-wrapper">
+						{this.state.body.map((item, i) => {
+							if (this.state.body.length - 1 === i) {
+								ipcRenderer.send('complete');
+								return (
+									<div className="user" key={i}>
+										<ContactMailIcon className="icon" />
+										<div>
+											{item.firstName}
+											{', ' + item.lastName},
+											{', ' + item.username},
+											{', ' + item.phone}
+										</div>
+									</div>
+								);
+							} else {
+								return (
+									<div className="user" key={i}>
+										<ContactMailIcon className="icon" />
+										<div>
+											{item.firstName}
+											{', ' + item.lastName},
+											{', ' + item.username},
+											{', ' + item.phone}
+										</div>
+									</div>
+								);
+							}
+						})}
+					</div>
 				</div>
 			</div>
-			<div className="bottom">
-				<div className="inner-wrapper">
-					{data.body.map((item, i) => {
-						return (
-							<div className="user" key={i}>
-								<ContactMailIcon className="icon" />
-								<div>
-									{item.firstName}
-									{', ' + item.lastName},
-									{', ' + item.username},{', ' + item.phone}
-								</div>
-							</div>
-						);
-					})}
-				</div>
-			</div>
-		</div>
-	);
+		);
+	}
 }
 
 export default Logs;

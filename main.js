@@ -103,9 +103,9 @@ app.whenReady().then(async () => {
 
 		while (counter < amount) {
 			counter = await getData(counter, win, client, group);
-			console.log('sleep 2000 ms');
+			await console.log('sleep 2000 ms');
 			await sleep(5000);
-			console.log('awake');
+			await console.log('awake');
 		}
 
 		await writeResult(data, group);
