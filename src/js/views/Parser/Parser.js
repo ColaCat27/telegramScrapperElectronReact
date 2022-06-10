@@ -27,6 +27,10 @@ function Parser() {
 		setChannelError(true);
 	});
 
+	ipcRenderer.on('clear-group', () => {
+		setIsWorking(false);
+	});
+
 	return (
 		<div className="parser">
 			<Navbar />

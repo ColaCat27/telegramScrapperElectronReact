@@ -110,6 +110,8 @@ app.whenReady().then(async () => {
 		}
 
 		await writeResult(data, group);
+		win.webContents.send('stop');
+		win.webContents.send('clear-group');
 
 		function writeResult(data, channelLink) {
 			let ws;

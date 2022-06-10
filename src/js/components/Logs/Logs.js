@@ -29,6 +29,10 @@ class Logs extends React.Component {
 				body: prev.body.concat(message.data),
 			}));
 		});
+
+		ipcRenderer.on('stop', (e, message) => {
+			this.setState((prev) => ({ ...prev, left: 0, isWorking: false }));
+		});
 	}
 
 	componentWillUnmount() {
@@ -62,10 +66,13 @@ class Logs extends React.Component {
 								<div className="user" key={i}>
 									<ContactMailIcon className="icon" />
 									<div>
-										{item.firstName}
-										{', ' + item.lastName},
-										{', ' + item.username},
-										{', ' + item.phone}
+										{item.firstName +
+											';' +
+											item.lastName +
+											';' +
+											item.username +
+											';' +
+											item.phone}
 									</div>
 								</div>
 							);
