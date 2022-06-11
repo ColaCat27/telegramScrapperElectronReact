@@ -20,6 +20,9 @@
             margin-bottom: 20px;
 
         }
+        label {
+            color: #fff;
+        }
         #standard-basic-label {
             color: #fff;
             &::placeholder {
@@ -34,10 +37,6 @@
             &:hover::before {
                 border-color: #fff;
             }
-        }
-        .tip {
-            font-size: 15px;
-            color: #fff;
         }
         .progress {
             margin-top: 10px;

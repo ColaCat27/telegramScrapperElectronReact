@@ -1,11 +1,7 @@
 const { BrowserWindow, app, ipcMain, Notification } = require('electron');
 const { TelegramClient, Api, client } = require('telegram');
 const { StringSession } = require('telegram/sessions/index.js');
-const fs = require('fs');
-const input = require('input');
-const path = require('path');
 const XLSX = require('xlsx');
-const isDev = !app.isPackaged;
 
 const sleep = (ms) => {
 	return new Promise((resolve, reject) => {
@@ -29,10 +25,6 @@ function createWindow() {
 	return win;
 }
 
-// ipcMain.on('notify', (_, message) => {
-// 	new Notification({ title: 'Notifiation', body: message }).show();
-// });
-
 app.whenReady().then(async () => {
 	const win = await createWindow();
 
@@ -43,9 +35,7 @@ app.whenReady().then(async () => {
 	});
 
 	ipcMain.on('start', async (e, message) => {
-		const { group, session } = message;
-		let id = 5146593;
-		let hash = 'fd90930b9ff6ced645baf18e28ac61a8';
+		const { group, id, hash, session } = message;
 
 		const stringSession = new StringSession(session);
 
@@ -231,12 +221,6 @@ const login = async (id, hash, win) => {
 
 		win.webContents.send('login-success', session);
 
-		if (!fs.existsSync(`${__dirname}/sessions`)) {
-			fs.mkdirSync(`${__dirname}/sessions`);
-		}
-
-		fs.writeFileSync(`${__dirname}/sessions/session`, session);
-
 		ipcMain.on('destroy', () => {
 			client.destroy();
 		});
@@ -244,6 +228,10 @@ const login = async (id, hash, win) => {
 		win.webContents.send('data-correct', false);
 	}
 };
+
+ipcMain.on('notify', (_, message) => {
+	new Notification({ title: message.title, body: message.body }).show();
+});
 
 require('electron-reload')(__dirname, {
 	// Note that the path to electron may vary according to the main file

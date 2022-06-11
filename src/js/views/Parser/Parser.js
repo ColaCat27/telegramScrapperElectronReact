@@ -6,7 +6,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Alert from '@mui/material/Alert';
-import Stack from '@mui/material/Stack';
 
 import './parser.scss';
 import { ipcRenderer } from 'electron';
@@ -19,7 +18,13 @@ function Parser() {
 
 	const handleClick = (e) => {
 		e.preventDefault();
-		ipcRenderer.send('start', { group: group, session: apiData });
+		let { id, hash, session } = JSON.parse(apiData);
+		ipcRenderer.send('start', {
+			group: group,
+			id: id,
+			hash: hash,
+			session: session,
+		});
 		setIsWorking(true);
 	};
 
@@ -32,6 +37,10 @@ function Parser() {
 	});
 
 	ipcRenderer.on('clear-group', () => {
+		ipcRenderer.send('notify', {
+			title: 'Task complete',
+			body: `You can get data from file: ${group}.xlsx`,
+		});
 		setIsWorking(false);
 	});
 
@@ -50,7 +59,7 @@ function Parser() {
 							autoComplete="off"
 						>
 							<TextField
-								id="standard-basic"
+								id="group"
 								label="Group"
 								variant="standard"
 								autoFocus={true}

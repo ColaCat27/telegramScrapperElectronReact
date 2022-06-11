@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ipcRenderer } from 'electron';
 import RotateRightIcon from '@mui/icons-material/RotateRight';
-import ContactMailIcon from '@mui/icons-material/ContactMail';
 import StopIcon from '@mui/icons-material/Stop';
 import './logs.scss';
 
@@ -39,6 +38,7 @@ class Logs extends React.Component {
 		ipcRenderer.removeListener('amount');
 		ipcRenderer.removeListener('data');
 	}
+
 	render() {
 		return (
 			<div className="logs">
@@ -60,24 +60,23 @@ class Logs extends React.Component {
 					</div>
 				</div>
 				<div className="bottom">
-					<div className="inner-wrapper">
-						{this.state.body.map((item, i) => {
-							return (
-								<div className="user" key={i}>
-									<ContactMailIcon className="icon" />
-									<div>
-										{item.firstName +
-											';' +
-											item.lastName +
-											';' +
-											item.username +
-											';' +
-											item.phone}
-									</div>
+					<div className="inner-wrapper"></div>
+					{this.state.body.map((item, i) => {
+						return (
+							<div className="user" key={i}>
+								<ContactMailIcon className="icon" />
+								<div>
+									{item.firstName +
+										';' +
+										item.lastName +
+										';' +
+										item.username +
+										';' +
+										item.phone}
 								</div>
-							);
-						})}
-					</div>
+							</div>
+						);
+					})}
 				</div>
 			</div>
 		);

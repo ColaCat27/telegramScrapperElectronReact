@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/authContext';
 import { ipcRenderer } from 'electron';
 import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Alert from '@mui/material/Alert';
 
 import './login.scss';
 
@@ -116,23 +119,35 @@ function Login() {
 		}
 	};
 
-	ipcRenderer.on('login-success', (e, message) => {
+	ipcRenderer.on('login-success', async (e, message) => {
 		console.log('Событие login-success');
 		console.log(message);
-		dispatch({ type: 'LOGIN_SUCCESS', payload: message });
+		dispatch({
+			type: 'LOGIN_SUCCESS',
+			payload: Object.assign(credentials, { session: message }),
+		});
 		navigate('/');
 	});
 
 	const handleChange = (e) => {
+		if (authError) {
+			setAuthError(false);
+		} else if (phoneError) {
+			setPhoneError(false);
+		} else if (codeError) {
+			setCodeError(false);
+		}
+		let value = e.target.value.replace(/\W/g, '');
+
 		if (e.target.id == 'id' || e.target.id == 'hash') {
 			setCredentials((prev) => ({
 				...prev,
-				[e.target.id]: e.target.value,
+				[e.target.id]: value,
 			}));
 		} else {
 			setPhoneData((prev) => ({
 				...prev,
-				[e.target.id]: e.target.value,
+				[e.target.id]: value,
 			}));
 		}
 	};
@@ -141,28 +156,30 @@ function Login() {
 		<div className="login">
 			<div className="wrapper">
 				<div className={confirm ? 'api hidden' : 'api'}>
-					<div className="input">
-						<label>API ID</label>
-						<input
-							type="text"
-							placeholder="25151"
+					<Box
+						component="form"
+						sx={{
+							'& > :not(style)': { m: 1, width: '43ch' },
+						}}
+						noValidate
+						autoComplete="off"
+					>
+						<TextField
 							id="id"
-							onChange={handleChange}
+							label="API ID"
+							variant="standard"
+							autoFocus={true}
 							value={credentials.id}
-							disabled={loader}
-						/>
-					</div>
-					<div className="input">
-						<label>API HASH</label>
-						<input
-							type="text"
-							placeholder="1t1tg43g3yyghHT534TF"
-							id="hash"
 							onChange={handleChange}
-							value={credentials.hash}
-							disabled={loader}
 						/>
-					</div>
+						<TextField
+							id="hash"
+							label="API HASH"
+							variant="standard"
+							value={credentials.hash}
+							onChange={handleChange}
+						/>
+					</Box>
 
 					{loader ? (
 						<div className="progress">
@@ -174,9 +191,9 @@ function Login() {
 						</button>
 					)}
 					{authError ? (
-						<span className="error">
-							Ошибка, неправильный API ID или API HASH
-						</span>
+						<Alert severity="error" className="error">
+							Incorrect API ID or HASH ID, enter correct values.
+						</Alert>
 					) : (
 						''
 					)}
@@ -187,45 +204,46 @@ function Login() {
 							BACK
 						</button>
 					</div>
-					<div className="input">
-						<label>PHONE</label>
-						<input
-							type="text"
-							placeholder="380502221111"
-							id="phone"
-							onChange={handleChange}
-							value={phoneData.phone}
-						/>
-					</div>
-
-					<div
-						className={phoneData.sended ? 'input' : 'input hidden'}
+					<Box
+						component="form"
+						sx={{
+							'& > :not(style)': { m: 1, width: '43ch' },
+						}}
+						noValidate
+						autoComplete="off"
 					>
-						<label>CODE</label>
-						<input
-							type="text"
-							placeholder="1255"
-							id="code"
+						<TextField
+							id="phone"
+							label="PHONE"
+							variant="standard"
+							autoFocus={true}
+							value={phoneData.phone}
 							onChange={handleChange}
-							value={phoneData.code}
 						/>
-					</div>
+						<TextField
+							id="code"
+							label="CODE"
+							variant="standard"
+							value={phoneData.code}
+							onChange={handleChange}
+							className={phoneData.sended ? '' : 'hidden'}
+						/>
+					</Box>
+
 					<button className="button" onClick={handleClick}>
 						{phoneData.sended ? 'Confirm' : 'Send'}
 					</button>
 					{phoneError ? (
-						<span className="error">
-							Такого телефона не существует, укажите правильный
-							телефон
-						</span>
+						<Alert severity="error" className="error">
+							Phone number not exist, add correct phone.
+						</Alert>
 					) : (
 						''
 					)}
 					{codeError ? (
-						<span className="error">
-							Не верный код, введите код повторно или вернитесь
-							назад
-						</span>
+						<Alert severity="error" className="error">
+							Incorrect code, enter correct code.
+						</Alert>
 					) : (
 						''
 					)}

@@ -8,11 +8,7 @@
         width: 400px;
     }
     .error {
-        display: block;
-        color: #fff;
-        font-size: 15px;
         margin-top: 10px;
-        text-align: center;
     }
     .btn-wrap {
         display: flex;
@@ -30,6 +26,25 @@
         width: 100%;
         display: flex;
         justify-content: center;
+    }
+    #standard-basic-label {
+        color: #fff;
+        &::placeholder {
+            color: #fff;
+        }
+    }
+    label {
+       color: #fff; 
+    }
+    .MuiInputBase-formControl {
+        color: #fff;
+        margin-bottom: 25px;
+        &::before {
+            border-bottom: 2px solid #fff;
+        }
+        &:hover::before {
+            border-color: #fff;
+        }
     }
     .button {
         font-size: 18px;
