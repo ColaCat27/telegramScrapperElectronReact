@@ -1,7 +1,12 @@
 import React from 'react';
 import Box from '@mui/material/Box';
+import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Avatar from '@mui/material/Avatar';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
 import { FixedSizeList } from 'react-window';
 import './logs.scss';
@@ -82,7 +87,6 @@ export default function VirtualizedList() {
 			sx={{
 				width: '100%',
 				height: 240,
-				// maxWidth: 360,
 				bgcolor: '#0d0d1c',
 				color: '#fff',
 			}}

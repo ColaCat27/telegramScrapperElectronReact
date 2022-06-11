@@ -1,67 +1,100 @@
-import React, { useState } from 'react';
-import './navbar.scss';
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import Settings from '@mui/icons-material/Settings';
+import Logout from '@mui/icons-material/Logout';
 
-function Navbar() {
-	const [show, setShow] = useState(false);
-
-	const handleMenu = () => {
-		setShow(!show);
+export default function AccountMenu() {
+	const [anchorEl, setAnchorEl] = React.useState(null);
+	const open = Boolean(anchorEl);
+	const handleClick = (event) => {
+		setAnchorEl(event.currentTarget);
 	};
-
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
 	return (
-		<div className="navbar">
-			<div className="left">
-				<img
-					src="https://tailwindui.com/img/logos/workflow-logo-indigo-500-mark-white-text.svg"
-					className="logo"
-				/>
-				<ul className="list">
-					<li className="list__item list__item_active">Parser</li>
-					<li className="list__item">Sender</li>
-					<li className="list__item">Logs</li>
-					<li className="list__item">Donate</li>
-				</ul>
-			</div>
-			<div className="right">
-				<div className="notifications">
-					<button type="button">
-						<svg
-							class="h-6 w-6"
-							x-description="Heroicon name: outline/bell"
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke-width="2"
-							stroke="currentColor"
-							aria-hidden="true"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-							></path>
-						</svg>
-					</button>
-				</div>
-				<div className="user" onClick={handleMenu}>
-					<ul
-						className="user__menu"
-						style={{
-							display: show ? 'block' : '',
-						}}
+		<React.Fragment>
+			<Box
+				sx={{
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'flex-end',
+					textAlign: 'center',
+					width: '100%',
+				}}
+			>
+				<Tooltip title="Account settings">
+					<IconButton
+						onClick={handleClick}
+						size="small"
+						sx={{ ml: 2 }}
+						aria-controls={open ? 'account-menu' : undefined}
+						aria-haspopup="true"
+						aria-expanded={open ? 'true' : undefined}
 					>
-						<li className="user__menu-item">
-							<a href="">Profile Data</a>
-						</li>
-						<li className="user__menu-item">
-							<a href="">Change API Data</a>
-						</li>
-					</ul>
-					<img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" />
-				</div>
-			</div>
-		</div>
+						<Avatar sx={{ width: 32, height: 32 }}>M</Avatar>
+					</IconButton>
+				</Tooltip>
+			</Box>
+			<Menu
+				anchorEl={anchorEl}
+				id="account-menu"
+				open={open}
+				onClose={handleClose}
+				onClick={handleClose}
+				PaperProps={{
+					elevation: 0,
+					sx: {
+						overflow: 'visible',
+						filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+						mt: 1.5,
+						'& .MuiAvatar-root': {
+							width: 32,
+							height: 32,
+							ml: -0.5,
+							mr: 1,
+						},
+						'&:before': {
+							content: '""',
+							display: 'block',
+							position: 'absolute',
+							top: 0,
+							right: 14,
+							width: 10,
+							height: 10,
+							bgcolor: 'background.paper',
+							transform: 'translateY(-50%) rotate(45deg)',
+							zIndex: 0,
+						},
+					},
+				}}
+				transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+				anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+			>
+				<MenuItem>
+					<Avatar /> My account
+				</MenuItem>
+				<Divider />
+				<MenuItem>
+					<ListItemIcon>
+						<Settings fontSize="small" />
+					</ListItemIcon>
+					Settings
+				</MenuItem>
+				<MenuItem>
+					<ListItemIcon>
+						<Logout fontSize="small" />
+					</ListItemIcon>
+					Logout
+				</MenuItem>
+			</Menu>
+		</React.Fragment>
 	);
 }
-
-export default Navbar;

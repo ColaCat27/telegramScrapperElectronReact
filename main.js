@@ -82,26 +82,32 @@ app.whenReady().then(async () => {
 			},
 		});
 
-		const amount = await checkChannel(group, client);
-		win.webContents.send('amount', amount);
+		// const amount = await checkChannel(group, client);
+		// win.webContents.send('amount', amount);
+		const result = await client.invoke(
+			new Api.users.GetFullUser({
+				id: 'me',
+			})
+		);
+		const user = result.users[0];
 
 		let counter = 0;
 		let data = [];
 
-		if (!amount) {
-			win.webContents.send('channel-error');
-		}
+		// if (!amount) {
+		// 	win.webContents.send('channel-error');
+		// }
 
-		while (counter < amount) {
-			counter = await getData(counter, win, client, group);
-			console.log('sleep 2000 ms');
-			await sleep(2000);
-			console.log('awake');
-		}
+		// while (counter < amount) {
+		// 	counter = await getData(counter, win, client, group);
+		// 	console.log('sleep 2000 ms');
+		// 	await sleep(2000);
+		// 	console.log('awake');
+		// }
 
-		await writeResult(data, group);
-		win.webContents.send('stop');
-		win.webContents.send('clear-group');
+		// await writeResult(data, group);
+		// win.webContents.send('stop');
+		// win.webContents.send('clear-group');
 
 		function writeResult(data, channelLink) {
 			let ws;
@@ -229,8 +235,9 @@ const login = async (id, hash, win) => {
 	}
 };
 
-ipcMain.once('notify', (_, message) => {
+ipcMain.on('notify', (_, message) => {
 	new Notification({ title: message.title, body: message.body }).show();
+	ipcMain.removeListener('notify');
 });
 
 require('electron-reload')(__dirname, {

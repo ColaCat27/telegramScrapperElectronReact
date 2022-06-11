@@ -5,8 +5,6 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Alert from '@mui/material/Alert';
 import LoadingButton from '@mui/lab/LoadingButton';
-import SaveIcon from '@mui/icons-material/Save';
-import Stack from '@mui/material/Stack';
 
 import './parser.scss';
 import { ipcRenderer } from 'electron';
