@@ -64,7 +64,6 @@ class Logs extends React.Component {
 					{this.state.body.map((item, i) => {
 						return (
 							<div className="user" key={i}>
-								<ContactMailIcon className="icon" />
 								<div>
 									{item.firstName +
 										';' +

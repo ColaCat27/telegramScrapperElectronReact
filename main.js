@@ -229,7 +229,7 @@ const login = async (id, hash, win) => {
 	}
 };
 
-ipcMain.on('notify', (_, message) => {
+ipcMain.once('notify', (_, message) => {
 	new Notification({ title: message.title, body: message.body }).show();
 });
 

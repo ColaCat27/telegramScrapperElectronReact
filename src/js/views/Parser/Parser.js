@@ -1,27 +1,28 @@
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '../../context/authContext';
+import React, { useState } from 'react';
 import Navbar from '../../components/Navbar/Navbar';
 import Logs from '../../components/Logs/Logs';
-import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Alert from '@mui/material/Alert';
+import LoadingButton from '@mui/lab/LoadingButton';
+import SaveIcon from '@mui/icons-material/Save';
+import Stack from '@mui/material/Stack';
 
 import './parser.scss';
 import { ipcRenderer } from 'electron';
 
 function Parser() {
-	const { apiData } = useContext(AuthContext);
 	const [group, setGroup] = useState(undefined);
 	const [channelError, setChannelError] = useState(false);
 	const [isWorking, setIsWorking] = useState(false);
 
 	const handleClick = (e) => {
 		e.preventDefault();
-		let { id, hash, session } = JSON.parse(apiData);
+		let { id, hash, session } = JSON.parse(localStorage.getItem('apiData'));
+		let apiId = parseInt(id);
 		ipcRenderer.send('start', {
 			group: group,
-			id: id,
+			id: apiId,
 			hash: hash,
 			session: session,
 		});
@@ -86,20 +87,19 @@ function Parser() {
 				<div className="logs-wrapper">
 					<Logs isWorking={isWorking} />
 				</div>
-
-				{isWorking ? (
-					<div className="progress">
-						<CircularProgress />
-					</div>
-				) : (
-					<button
-						className="button"
+				<Box sx={{ '& > button': { m: 1 } }}>
+					<LoadingButton
 						onClick={handleClick}
+						loading={isWorking}
+						loadingIndicator="Loading..."
+						variant="contained"
+						size="large"
 						disabled={!group}
+						className="button"
 					>
-						Start
-					</button>
-				)}
+						Fetch data
+					</LoadingButton>
+				</Box>
 			</div>
 		</div>
 	);
