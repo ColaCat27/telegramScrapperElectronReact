@@ -5,10 +5,10 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Alert from "@mui/material/Alert";
 import LoadingButton from "@mui/lab/LoadingButton";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Switch from "@mui/material/Switch";
-import SaveIcon from "@mui/icons-material/Save";
 import SendIcon from "@mui/icons-material/Send";
+import Button from "@mui/material/Button";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Stack from "@mui/material/Stack";
 
 import "./parser.scss";
 import { ipcRenderer } from "electron";
@@ -79,7 +79,7 @@ function Parser() {
           {!group ? (
             <Alert severity="info">Please enter telegram group link!</Alert>
           ) : (
-            <Alert severity="success">All okay you can start right now!</Alert>
+            ""
           )}
         </div>
         <div className="logs-wrapper">
@@ -97,6 +97,9 @@ function Parser() {
           >
             Fetch data
           </LoadingButton>
+          <Button variant="outlined" startIcon={<DeleteIcon />}>
+            Delete
+          </Button>
         </Box>
       </div>
     </div>

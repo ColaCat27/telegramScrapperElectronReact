@@ -2,6 +2,7 @@ const { BrowserWindow, app, ipcMain, Notification } = require("electron");
 const { TelegramClient, Api, client } = require("telegram");
 const { StringSession } = require("telegram/sessions/index.js");
 const XLSX = require("xlsx");
+const fs = require("fs");
 
 const sleep = (ms) => {
   return new Promise((resolve, reject) => {
@@ -111,6 +112,7 @@ app.whenReady().then(async () => {
     }
 
     //Записываем результат и останавливаем программу
+
     await writeResult(data, group);
     win.webContents.send("stop");
     win.webContents.send("clear-group");
@@ -236,10 +238,10 @@ const login = async (id, hash, win) => {
   }
 };
 
-ipcMain.on("notify", (_, message) => {
-  new Notification({ title: message.title, body: message.body }).show();
-  ipcMain.removeListener("notify");
-});
+// ipcMain.on("notify", (_, message) => {
+//   new Notification({ title: message.title, body: message.body }).show();
+//   ipcMain.removeListener("notify");
+// });
 
 require("electron-reload")(__dirname, {
   // Note that the path to electron may vary according to the main file
