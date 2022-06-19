@@ -1,57 +1,67 @@
 .parser {
+  width: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+  &__wrapper {
+    margin-top: 25px;
+  }
+  // &__group {
+  //   display: flex;
+  //   align-items: center;
+  // }
+  // &__logs {
+  //   width: 100%;
+  // }
+  &__inputs {
+    display: flex;
     width: 100%;
-    padding: 15px;
-    box-sizing: border-box;
-    .wrapper {
-        margin-top: 25px;
-
-        .group {
-            display: flex;
-            align-items: center;
-        }
-        .logs-wrapper {
-            width: 100%;
- 
-        }
-        .input-wrapper {
-            width: 250px;
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 20px;
-
-        }
-        label {
-            color: #fff;
-        }
-        #standard-basic-label {
-            color: #fff;
-            &::placeholder {
-                color: #fff;
-            }
-        }
-        .MuiInputBase-formControl {
-            color: #fff;
-            &::before {
-                border-bottom: 2px solid #fff;
-            }
-            &:hover::before {
-                border-color: #fff;
-            }
-        }
-        .progress {
-            margin-top: 10px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-        .button {
-            &:disabled {
-                color: #7e7e7e;
-                background-color: #303030;
-                cursor: auto;
-            }
-        }
+    margin-bottom: 20px;
+    position: relative;
+  }
+  &__clear {
+    position: absolute;
+    right: 30px;
+    bottom: -5px;
+  }
+  label {
+    color: #fff;
+  }
+  #standard-basic-label {
+    color: #fff;
+    &::placeholder {
+      color: #fff;
     }
-    
-
+  }
+  #group {
+    width: 100%;
+    padding-right: 30px;
+  }
+  #count {
+    width: 100px;
+  }
+  .alert {
+    margin-left: 20px;
+  }
+  .MuiInputBase-formControl {
+    color: #fff;
+    &::before {
+      border-bottom: 2px solid #fff;
+    }
+    &:hover::before {
+      border-color: #fff;
+    }
+  }
+  .progress {
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .button {
+    &:disabled {
+      color: #7e7e7e;
+      background-color: #303030;
+      cursor: auto;
+    }
+  }
 }
