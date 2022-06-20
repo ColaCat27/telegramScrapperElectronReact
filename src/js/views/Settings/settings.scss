@@ -1,0 +1,21 @@
+.settings {
+  padding: 20px;
+  color: #fff;
+  &__wrapper {
+    width: 550px;
+    margin: 0 auto;
+    padding: 10px 0px;
+  }
+  &__inputs {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.MuiOutlinedInput-notchedOutline.css-1d3z3hw-MuiOutlinedInput-notchedOutline {
+  border-color: #fff;
+}
+
+.MuiSvgIcon-root.MuiSvgIcon-fontSizeMedium.MuiSelect-icon {
+  color: #fff;
+}
