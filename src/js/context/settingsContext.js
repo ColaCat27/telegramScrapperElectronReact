@@ -1,25 +1,22 @@
-import { createContext, useReducer } from "react";
+import React, { createContext, useEffect, useReducer } from "react";
 
-const defaultValues = ["firstName", "lastName", "username", "phone"];
-
-const INITIAL_STATE = {
+const defaultSettings = {
   notifications: false,
-  targetValues: defaultValues,
+  language: "eng",
+  theme: "dark",
 };
 
-export const settingsContext = createContext(INITIAL_STATE);
+const INITIAL_STATE = {
+  settings: JSON.parse(localStorage.getItem("settings")) || defaultSettings,
+};
+
+const SettingsContext = createContext(INITIAL_STATE);
 
 const SettingsReducer = (state, action) => {
   switch (action.type) {
-    case "settings":
+    case "SETTINGS":
       return {
-        notifications: action.payload.notifications,
-        targetValues: action.payload.targetValues,
-      };
-    case "default":
-      return {
-        notifications: false,
-        targetValues: defaultValues,
+        settings: action.payload,
       };
     default:
       return state;
@@ -29,11 +26,14 @@ const SettingsReducer = (state, action) => {
 export const SettingsContextProvider = ({ children }) => {
   const [state, dispatch] = useReducer(SettingsReducer, INITIAL_STATE);
 
+  useEffect(() => {
+    localStorage.setItem("settings", JSON.stringify(state.settings));
+  }, [state.settings]);
+
   return (
     <SettingsContext.Provider
       value={{
-        notifications: state.notifications,
-        targetValues: state.targetValues,
+        settings: state,
         dispatch,
       }}
     >
@@ -41,3 +41,5 @@ export const SettingsContextProvider = ({ children }) => {
     </SettingsContext.Provider>
   );
 };
+
+export default SettingsContext;

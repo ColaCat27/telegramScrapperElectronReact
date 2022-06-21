@@ -1,6 +1,4 @@
 import React, { useState, useContext } from "react";
-import { styled } from "@mui/material/styles";
-import { settingsContext } from "../../context/settingsContext.js";
 import "./settings.scss";
 import Navbar from "../../components/Navbar/Navbar.js";
 import { useTheme } from "@mui/material/styles";
@@ -14,8 +12,7 @@ import Chip from "@mui/material/Chip";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-
-// const SettingsContext = useContext(settingsContext);
+import SettingsContext from "../../context/settingsContext";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -28,8 +25,6 @@ const MenuProps = {
   },
 };
 
-const fields = ["firstName", "lastName", "username", "phone"];
-
 function getStyles(name, fieldName, theme) {
   return {
     fontWeight:
@@ -39,11 +34,12 @@ function getStyles(name, fieldName, theme) {
   };
 }
 
-function MultipleSelectChip() {
+function MultipleSelectChip({ fields }) {
   const theme = useTheme();
-  const [fieldName, setFieldName] = React.useState([]);
+  const [fieldName, setFieldName] = useState([]);
 
   const handleChange = (event) => {
+    console.log(event);
     const {
       target: { value },
     } = event;
@@ -105,11 +101,31 @@ function MultipleSelectChip() {
 }
 
 function Settings() {
-  const [age, setAge] = React.useState("");
+  const { language, theme, notifications, dispatch } =
+    useContext(SettingsContext);
 
-  const handleChange = (event) => {
-    setAge(event.target.value);
+  console.log(language);
+  const [settings, setSettings] = useState({
+    notifications: notifications,
+    language: language,
+    theme: theme,
+  });
+
+  const handleLang = (e) => {
+    setSettings((prev) => ({ ...prev, language: e.target.value }));
+    dispatch({ type: "SETTINGS", payload: settings });
   };
+
+  const handleTheme = (e) => {
+    setSettings((prev) => ({ ...prev, theme: e.target.value }));
+    dispatch({ type: "THEME", payload: settings });
+  };
+
+  const handleNotifications = (e) => {
+    setSettings((prev) => ({ ...prev, notifications: e.target.checked }));
+    dispatch({ type: "SETTINGS", payload: settings });
+  };
+
   return (
     <div className="settings">
       <Navbar />
@@ -117,8 +133,9 @@ function Settings() {
       <div className="settings__wrapper">
         <FormGroup>
           <FormControlLabel
-            control={<Switch defaultChecked />}
+            control={<Switch />}
             label="Notifications"
+            onChange={handleNotifications}
           />
         </FormGroup>
         <Box
@@ -135,35 +152,39 @@ function Settings() {
               </InputLabel>
               <Select
                 labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
+                id="language"
+                value={language}
                 label="Language"
-                onChange={handleChange}
+                sx={{ color: "#fff" }}
+                onChange={handleLang}
               >
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
+                <MenuItem value={"ua"}>UA</MenuItem>
+                <MenuItem value={"eng"}>ENG</MenuItem>
               </Select>
             </FormControl>
 
-            <FormControl sx={{ width: "250px" }}>
+            {/* <FormControl sx={{ width: "250px" }}>
               <InputLabel id="demo-simple-select-label" sx={{ color: "#fff" }}>
                 Theme
               </InputLabel>
               <Select
                 labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={age}
+                id="theme"
+                value={theme}
                 label="Theme"
-                onChange={handleChange}
+                sx={{ color: "#fff" }}
+                onChange={handleTheme}
               >
-                <MenuItem value={10}>Ten</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
+                <MenuItem value={"white"}>White</MenuItem>
+                <MenuItem value={"dark"}>Dark</MenuItem>
               </Select>
-            </FormControl>
+            </FormControl> */}
           </div>
-          <MultipleSelectChip sx={{ width: "200px" }} />
+          {/* <MultipleSelectChip
+            sx={{ width: "200px" }}
+            onChange={handleChange}
+            fields={fields}
+          /> */}
         </Box>
       </div>
     </div>
